@@ -212,3 +212,5 @@ case object SpacesAroundMultiImports extends BooleanPreferenceDescriptor {
   val description = "Place spaces around multi imports (import a.{ b, c, d }"
   val defaultValue = true
 }
+
+
