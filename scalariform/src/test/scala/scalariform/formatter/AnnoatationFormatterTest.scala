@@ -30,7 +30,8 @@ class AnnoatationFormatterTest extends AbstractFormatterTest {
     |  def asdf(
     |    @annotation
     |    one: Int,
-    |    @a @b(c)
+    |    @a
+    |    @b(c)
     |    two: String
     |  )
     |}
