@@ -1,13 +1,14 @@
 package scalariform.formatter
 
 import scalariform.parser.{CompilationUnit, ScalaParser}
+import scalariform.formatter.preferences.{ForceAnnotationToNextLine, IndentPackageBlocks, FormattingPreferences}
 
 /**
  * Created by bambucha on 02.03.14.
  */
 class AnnoatationFormatterTest extends AbstractFormatterTest {
 
-  override def debug: Boolean = false
+  override def debug: Boolean = true
 
   def parse(parser: ScalaParser) = parser.compilationUnitOrScript()
 
@@ -18,39 +19,39 @@ class AnnoatationFormatterTest extends AbstractFormatterTest {
   "def asdf(@annotation one: Int, @a @b(c) two: String)" ==> "def asdf(@annotation one: Int, @a @b(c) two: String)"
 
 
-  """class X {
-    |  def asdf(
-    |    @annotation one: Int,
-    |    @a @b(c) two: String
-    |    ) = ???
-    |}
-  """.stripMargin ==>
-  """
-    |class X {
-    |  def asdf(
-    |    @annotation
-    |    one: Int,
-    |    @a
-    |    @b(c)
-    |    two: String
-    |  )
-    |}
-  """.stripMargin
+  {
 
-  """class A extends B {
-    |  @SomeImportantAnnotation(param = true) override val param: Int = 1
-    |
-    |  @NotSoImportantAnnotation(param = false) val description: String = "Not so important"
-    |}
-  """.stripMargin ==>
-  """class A extends B {
-    |  @SomeImportantAnnotation(param = true)
-    |  override val param: Int = 1
-    |
-    |  @NotSoImportantAnnotation(param = false)
-    |  val description: String = "Not so important"
-    |}
-  """.stripMargin
+    implicit val formattingPreferences = FormattingPreferences.setPreference(ForceAnnotationToNextLine, true)
 
+    """class X {
+      |  def asdf(
+      |    @annotation one: Int,
+      |    @a @b(c) two: String
+      |    ) = ???
+      |}""".stripMargin ==>
+    """
+      |class X {
+      |  def asdf(
+      |    @annotation
+      |    one: Int,
+      |    @a
+      |    @b(c)
+      |    two: String
+      |  )
+      |}""".stripMargin
 
+    """class A extends B {
+      |  @SomeImportantAnnotation(param = true) override val param: Int = 1
+      |
+      |  @NotSoImportantAnnotation(param = false) def description: String = "Not so important"
+      |}""".stripMargin ==>
+    """class A extends B {
+      |  @SomeImportantAnnotation(param = true)
+      |  override val param: Int = 1
+      |
+      |  @NotSoImportantAnnotation(param = false)
+      |  def description: String = "Not so important"
+      |}""".stripMargin
+
+  }
 }

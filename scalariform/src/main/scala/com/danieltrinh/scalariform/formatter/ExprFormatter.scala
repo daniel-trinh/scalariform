@@ -881,7 +881,7 @@ trait ExprFormatter { self: HasFormattingPreferences with AnnotationFormatter wi
     for ((previousAnnotationOpt, annotation, nextAnnotationOpt) ← Utils.withPreviousAndNext(annotations)) {
       formatResult ++= format(annotation)
       for (previousAnnotation ← previousAnnotationOpt) {
-        val instruction = if (previousAnnotation.newlineOption.isDefined)
+        val instruction = if (previousAnnotation.newlineOption.isDefined || formattingPreferences(ForceAnnotationToNextLine))
           formatterState.currentIndentLevelInstruction
         else
           CompactEnsuringGap
@@ -892,7 +892,7 @@ trait ExprFormatter { self: HasFormattingPreferences with AnnotationFormatter wi
           case Nil                ⇒ defOrDcl.firstToken
           case (modifier :: rest) ⇒ modifier.firstToken
         }
-        val instruction = if (annotation.newlineOption.isDefined)
+        val instruction = if (annotation.newlineOption.isDefined || formattingPreferences(ForceAnnotationToNextLine))
           formatterState.currentIndentLevelInstruction
         else
           CompactEnsuringGap

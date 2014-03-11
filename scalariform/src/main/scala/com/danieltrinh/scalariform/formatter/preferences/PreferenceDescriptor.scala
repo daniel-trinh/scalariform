@@ -212,3 +212,9 @@ case object SpacesAroundMultiImports extends BooleanPreferenceDescriptor {
   val description = "Place spaces around multi imports (import a.{ b, c, d }"
   val defaultValue = true
 }
+
+case object ForceAnnotationToNextLine extends BooleanPreferenceDescriptor {
+  val key = "forceAnnotationToNextLine"
+  val description = "Force annotation to next line"
+  val defaultValue = false
+}
