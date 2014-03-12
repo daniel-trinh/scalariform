@@ -8,7 +8,7 @@ import scalariform.formatter.preferences.{ForceAnnotationToNextLine, IndentPacka
  */
 class AnnoatationFormatterTest extends AbstractFormatterTest {
 
-  override def debug: Boolean = true
+  override def debug: Boolean = false
 
   def parse(parser: ScalaParser) = parser.compilationUnitOrScript()
 
@@ -29,15 +29,14 @@ class AnnoatationFormatterTest extends AbstractFormatterTest {
       |    @a @b(c) two: String
       |    ) = ???
       |}""".stripMargin ==>
-    """
-      |class X {
+    """class X {
       |  def asdf(
       |    @annotation
       |    one: Int,
       |    @a
       |    @b(c)
       |    two: String
-      |  )
+      |  ) = ???
       |}""".stripMargin
 
     """class A extends B {

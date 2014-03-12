@@ -1289,9 +1289,16 @@ trait ExprFormatter { self: HasFormattingPreferences with AnnotationFormatter wi
   private def format(param: Param)(implicit formatterState: FormatterState): FormatResult = {
     val Param(annotations: List[Annotation], modifiers: List[Modifier], valOrVarOpt: Option[Token], id: Token, paramTypeOpt: Option[(Token, Type)], defaultValueOpt: Option[(Token, Expr)]) = param
     var formatResult: FormatResult = NoFormatResult
+    val forceAnnotationToNextLine = formattingPreferences(ForceAnnotationToNextLine)
 
     for (annotation ← annotations) {
       formatResult ++= format(annotation)
+      if(forceAnnotationToNextLine){
+        formatResult ++= formatResult.before(annotation.at, formatterState.currentIndentLevelInstruction)
+      }
+    }
+    if(forceAnnotationToNextLine && !annotations.isEmpty){
+      formatResult ++= formatResult.before(id, formatterState.currentIndentLevelInstruction)
     }
     for ((colon, paramType) ← paramTypeOpt) {
       formatResult ++= format(paramType)
