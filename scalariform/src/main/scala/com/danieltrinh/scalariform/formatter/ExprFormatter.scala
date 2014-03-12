@@ -983,11 +983,11 @@ trait ExprFormatter { self: HasFormattingPreferences with AnnotationFormatter wi
   }
 
   // TODO: Parts of this function might be useful in implementing other alignment features
-  protected def calculateParamSectionLengths(param: Param, first: Boolean)(implicit formatterState: FormatterState): Option[ParamSectionLengths] = {
+  protected def calculateParamSectionLengths(param: Param, first: Boolean, startWithNewLine: Boolean)(implicit formatterState: FormatterState): Option[ParamSectionLengths] = {
     val Param(annotations, modifiers, valOrVarOpt, id, paramTypeOpt, defaultValueOpt) = param
 
     val formattedParam = formattedAstNode(param) {
-      format(param)(formatterState)
+      format(param, startWithNewLine && formattingPreferences(ForceAnnotationToNextLine))(formatterState)
     }
 
     def calculateLengths: ParamSectionLengths = {
@@ -1091,7 +1091,8 @@ trait ExprFormatter { self: HasFormattingPreferences with AnnotationFormatter wi
       val paramIsAlignable = alignParameters && (!isFirstParam || firstParamAlignable)
 
       if (alignParameters && paramIsAlignable) {
-        calculateParamSectionLengths(paramToAppend, isFirstParam) match {
+        val breakAnnotation = paramToAppend.annotations.headOption.fold(false){ annotation => newlineBefore(annotation.at)}
+        calculateParamSectionLengths(paramToAppend, isFirstParam, breakAnnotation) match {
           case Some(sectionLengths) ⇒
             groupedParams match {
               case Right(param) :: tail ⇒
@@ -1141,6 +1142,7 @@ trait ExprFormatter { self: HasFormattingPreferences with AnnotationFormatter wi
     var formatResult: FormatResult = NoFormatResult
     var paramFormatterState = formatterState
     val alignParameters = formattingPreferences(AlignParameters) && !formattingPreferences(IndentWithTabs)
+    val forceAnnotation = formattingPreferences(ForceAnnotationToNextLine)
 
     /* Force a newline for the first argument if this is a set of
      *   multi line arguments:
@@ -1183,6 +1185,8 @@ trait ExprFormatter { self: HasFormattingPreferences with AnnotationFormatter wi
       case None ⇒ ((None, None), Nil)
     }
 
+    val startWithNewLineAndForceAnnotationToNext = firstTokenIsOnNewline && forceAnnotation
+
     for (firstParam ← firstGroupedParamOption) {
       maxSectionLengthsOption match {
         case Some(lengths) ⇒
@@ -1198,7 +1202,7 @@ trait ExprFormatter { self: HasFormattingPreferences with AnnotationFormatter wi
         case None ⇒
           alignFirstParam(firstParam)
       }
-      formatResult ++= format(firstParam)(paramFormatterState)
+      formatResult ++= format(firstParam, startWithNewLineAndForceAnnotationToNext)(paramFormatterState)
     }
 
     otherGroupedParams.foreach {
@@ -1215,11 +1219,11 @@ trait ExprFormatter { self: HasFormattingPreferences with AnnotationFormatter wi
           // Indent Default
           indentDefault(param, maxSectionLengths)
 
-          formatResult ++= format(param)(paramFormatterState)
+          formatResult ++= format(param, startWithNewLineAndForceAnnotationToNext)(paramFormatterState)
         }
       case Right(param) ⇒
         alignOtherParams(param.firstToken)
-        formatResult ++= format(param)(paramFormatterState)
+        formatResult ++= format(param, startWithNewLineAndForceAnnotationToNext)(paramFormatterState)
     }
 
     def alignFirstParam(firstParam: Param) = {
@@ -1286,10 +1290,9 @@ trait ExprFormatter { self: HasFormattingPreferences with AnnotationFormatter wi
 
   }
 
-  private def format(param: Param)(implicit formatterState: FormatterState): FormatResult = {
+  private def format(param: Param, forceAnnotationToNextLine: Boolean)(implicit formatterState: FormatterState): FormatResult = {
     val Param(annotations: List[Annotation], modifiers: List[Modifier], valOrVarOpt: Option[Token], id: Token, paramTypeOpt: Option[(Token, Type)], defaultValueOpt: Option[(Token, Expr)]) = param
     var formatResult: FormatResult = NoFormatResult
-    val forceAnnotationToNextLine = formattingPreferences(ForceAnnotationToNextLine)
 
     for (annotation ← annotations) {
       formatResult ++= format(annotation)

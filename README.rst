@@ -211,6 +211,49 @@ If ``true``, then::
 This option is disabled if ``indentWithTabs`` is ``true``.
 
 
+forceAnnotationToNextLine
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Default: ``false``
+
+Insert next line after annotation
+
+Start code::
+
+@Some Class Example {
+
+  @Field val x = 1
+
+  @Method def method = "Ala ma kota"
+
+  def secondMethod(@Argument arg: Int)
+}
+
+if ``false``, then::
+
+@Some class Example {
+
+  @Field val x = 1
+
+  @Method def method = "Ala ma kota"
+
+  def secondMethod(@Argument arg: Int)
+}
+
+if ``true``, then::
+
+@Some
+class Example {
+
+  @Field
+  val x = 1
+
+  @Method
+  def method = "Ala ma kota"
+
+  def secondMethod(@Argument arg: Int)
+}
+
 alignSingleLineCaseStatements
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

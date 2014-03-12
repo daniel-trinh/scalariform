@@ -56,5 +56,9 @@ class AnnoatationFormatterTest extends AbstractFormatterTest {
     """@Annotation
       |class X {}""".stripMargin
 
+    """def secondMethod(@Argument arg: Int)""" ==> """def secondMethod(@Argument arg: Int)"""
+
+
+
   }
 }
