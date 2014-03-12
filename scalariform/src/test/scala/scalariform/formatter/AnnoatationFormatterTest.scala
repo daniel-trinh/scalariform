@@ -52,5 +52,9 @@ class AnnoatationFormatterTest extends AbstractFormatterTest {
       |  def description: String = "Not so important"
       |}""".stripMargin
 
+    """@Annotation class X{}""" ==>
+    """@Annotation
+      |class X {}""".stripMargin
+
   }
 }
