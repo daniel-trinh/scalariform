@@ -1,11 +1,8 @@
-package scalariform.formatter
+package com.danieltrinh.scalariform.formatter
 
-import scalariform.parser.{CompilationUnit, ScalaParser}
-import scalariform.formatter.preferences.{ForceAnnotationToNextLine, IndentPackageBlocks, FormattingPreferences}
+import com.danieltrinh.scalariform.formatter.preferences.{ForceAnnotationToNextLine, FormattingPreferences}
+import com.danieltrinh.scalariform.parser.{CompilationUnit, ScalaParser}
 
-/**
- * Created by bambucha on 02.03.14.
- */
 class AnnoatationFormatterTest extends AbstractFormatterTest {
 
   override def debug: Boolean = false
@@ -18,6 +15,18 @@ class AnnoatationFormatterTest extends AbstractFormatterTest {
 
   "def asdf(@annotation one: Int, @a @b(c) two: String)" ==> "def asdf(@annotation one: Int, @a @b(c) two: String)"
 
+  """class X {
+    |  def asdf(
+    |    @annotation one: Int,
+    |    @a @b(c) two: String
+    |  ) = ???
+    |}""".stripMargin ==>
+  """class X {
+    |  def asdf(
+    |    @annotation one: Int,
+    |    @a @b(c) two: String
+    |  ) = ???
+    |}""".stripMargin
 
   {
 
@@ -27,7 +36,7 @@ class AnnoatationFormatterTest extends AbstractFormatterTest {
       |  def asdf(
       |    @annotation one: Int,
       |    @a @b(c) two: String
-      |    ) = ???
+      |  ) = ???
       |}""".stripMargin ==>
     """class X {
       |  def asdf(

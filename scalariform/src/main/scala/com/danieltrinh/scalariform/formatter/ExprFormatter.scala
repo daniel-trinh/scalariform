@@ -1091,7 +1091,7 @@ trait ExprFormatter { self: HasFormattingPreferences with AnnotationFormatter wi
       val paramIsAlignable = alignParameters && (!isFirstParam || firstParamAlignable)
 
       if (alignParameters && paramIsAlignable) {
-        val breakAnnotation = paramToAppend.annotations.headOption.fold(false){ annotation => newlineBefore(annotation.at)}
+        val breakAnnotation = paramToAppend.annotations.headOption.foldLeft(false){ (result,annotation) =>  result || newlineBefore(annotation.at)}
         calculateParamSectionLengths(paramToAppend, isFirstParam, breakAnnotation) match {
           case Some(sectionLengths) ⇒
             groupedParams match {

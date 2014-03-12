@@ -216,7 +216,7 @@ forceAnnotationToNextLine
 
 Default: ``false``
 
-Insert next line after annotation
+Insert new line after annotation
 
 Start code::
 
@@ -227,6 +227,11 @@ Start code::
   @Method def method = "Ala ma kota"
 
   def secondMethod(@Argument arg: Int)
+
+  def thirdMethod(
+    @Argument first: Int,
+    @Argument second: String
+  )
 }
 
 if ``false``, then::
@@ -238,6 +243,11 @@ if ``false``, then::
   @Method def method = "Ala ma kota"
 
   def secondMethod(@Argument arg: Int)
+
+  def thirdMethod(
+    @Argument first: Int,
+    @Argument second: String
+  )
 }
 
 if ``true``, then::
@@ -252,6 +262,13 @@ class Example {
   def method = "Ala ma kota"
 
   def secondMethod(@Argument arg: Int)
+
+  def secondMethod(
+    @Argument
+    first: Int,
+    @Argument
+    second: String
+  )
 }
 
 alignSingleLineCaseStatements
