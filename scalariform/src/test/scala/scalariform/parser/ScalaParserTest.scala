@@ -1,13 +1,12 @@
 package scalariform.parser
 
 import scalariform.lexer._
-import scalariform.parser._
 
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
 // format: +preserveSpaceBeforeArguments
-class ScalaParserTest extends FlatSpec with ShouldMatchers {
+class ScalaParserTest extends FlatSpec with Matchers {
 
   "Parser" should "not throw exception" in {
     //    parseExpression("class X")
@@ -18,7 +17,6 @@ class ScalaParserTest extends FlatSpec with ShouldMatchers {
 class C(@annotation(foo = {1 + 2}) n: Int)
 """
     }
-
   }
 
   private def parseExpression(s: String) = {
@@ -26,5 +24,4 @@ class C(@annotation(foo = {1 + 2}) n: Int)
     val scalaParser = new ScalaParser(tokens.toArray)
     scalaParser.compilationUnit()
   }
-
 }

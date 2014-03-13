@@ -1,10 +1,10 @@
 package scalariform.utils
 
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
 // format: +preserveSpaceBeforeArguments
-class TrimmedTest extends FlatSpec with ShouldMatchers {
+class TrimmedTest extends FlatSpec with Matchers {
 
   it should "just work" in {
 

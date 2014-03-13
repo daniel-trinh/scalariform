@@ -1,7 +1,5 @@
 package scalariform.formatter
 
-import scalariform.parser._
-import scalariform.utils._
 import scalariform.lexer._
 import scalariform.formatter.preferences._
 import scala.annotation.tailrec
@@ -45,6 +43,7 @@ trait CommentFormatter { self: HasFormattingPreferences with ScalaFormatter ⇒
 
       val alignBeneathSecondAsterisk = formattingPreferences(PlaceScaladocAsterisksBeneathSecondAsterisk)
       val startOnFirstLine = formattingPreferences(MultilineScaladocCommentsStartOnFirstLine)
+      val stopOnLastLine = formattingPreferences(ScaladocCommentsStopOnLastLine)
       val beforeStarSpaces = if (alignBeneathSecondAsterisk) "  " else " "
       val afterStarSpaces = if (startOnFirstLine && !alignBeneathSecondAsterisk) "  " else " "
       sb.append(start.trim)
@@ -61,8 +60,9 @@ trait CommentFormatter { self: HasFormattingPreferences with ScalaFormatter ⇒
         }
         firstLine = false
       }
-      sb.append(newlineSequence).indent(indentLevel).append(beforeStarSpaces).append("*/")
-      sb.toString
+      if (stopOnLastLine) sb.append(" */")
+      else sb.append(newlineSequence).indent(indentLevel).append(beforeStarSpaces).append("*/")
+      sb.result()
     } else
       comment.rawText
 

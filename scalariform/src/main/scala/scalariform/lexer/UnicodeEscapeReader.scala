@@ -99,8 +99,7 @@ class UnicodeEscapeReader(val text: String, forgiveErrors: Boolean = false) exte
 
   private def readUnicodeChar(startPos: Int): Char = {
     this.unicodeEscapeSequence = consumeUnicodeEscape()
-    val decodedChar = decodeUnicodeChar(unicodeEscapeSequence takeRight 4 toList, unicodeEscapeSequence, startPos)
-    decodedChar
+    decodeUnicodeChar(unicodeEscapeSequence.takeRight(4).toList, unicodeEscapeSequence, startPos)
   }
 
   private def consumeUnicodeEscape(): String = {
@@ -114,7 +113,7 @@ class UnicodeEscapeReader(val text: String, forgiveErrors: Boolean = false) exte
     for (n ← 1 to 4)
       sb.append(consumeNextCharacter())
 
-    sb.toString
+    sb.toString()
   }
 
   private def decodeUnicodeChar(digits: List[Char], unicodeEscapeSequence: String, startPos: Int): Char = {

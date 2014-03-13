@@ -1,9 +1,6 @@
 package scalariform.formatter
 
-import preferences.FormattingPreferences._
 import scalariform.formatter.preferences._
-import scalariform.parser._
-import scalariform.formatter._
 
 // format: OFF
 class CompactControlReadabilityTest extends AbstractExpressionFormatterTest {

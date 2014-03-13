@@ -3,9 +3,7 @@ package scalariform.formatter
 import scalariform.lexer.Tokens._
 import scalariform.lexer._
 import scalariform.parser._
-import scalariform.utils.Utils._
 import scalariform.utils._
-import scalariform.utils.BooleanLang._
 import scalariform.formatter.preferences._
 import PartialFunction._
 import scalariform.ScalaVersions
@@ -251,7 +249,7 @@ abstract class ScalaFormatter extends HasFormattingPreferences with TypeFormatte
     }
   }
 
-  class StringBuilderExtra(builder: StringBuilder) {
+  implicit class StringBuilderExtra(builder: StringBuilder) {
 
     def indent(indentLevel: Int, baseIndentOption: Option[Int] = None) = {
       for {
@@ -265,11 +263,11 @@ abstract class ScalaFormatter extends HasFormattingPreferences with TypeFormatte
 
     def write(token: Token, replacementOption: Option[String] = None): Option[TextEdit] = {
       val rewriteArrows = formattingPreferences(RewriteArrowSymbols)
-      val actualReplacementOption = replacementOption orElse (condOpt(token.tokenType) {
+      val actualReplacementOption = replacementOption orElse condOpt(token.tokenType) {
         case ARROW if rewriteArrows  ⇒ "⇒"
         case LARROW if rewriteArrows ⇒ "←"
         case EOF                     ⇒ ""
-      })
+      }
       builder.append(actualReplacementOption getOrElse token.rawText)
       actualReplacementOption map { replaceEdit(token, _) }
     }
@@ -296,7 +294,6 @@ abstract class ScalaFormatter extends HasFormattingPreferences with TypeFormatte
     }
 
     def currentIndent = {
-      val current = currentColumn
       val lineStart = builder.length - currentColumn
       var pos = lineStart
       while (pos < builder.length && builder(pos).isWhitespace)
@@ -315,7 +312,6 @@ abstract class ScalaFormatter extends HasFormattingPreferences with TypeFormatte
     def atVisibleCharacter = builder.length > 0 && !Character.isWhitespace(lastChar)
 
   }
-  implicit def stringBuilder2stringBuilderExtra(builder: StringBuilder): StringBuilderExtra = new StringBuilderExtra(builder)
 
   private def defaultNewlineFormattingInstruction(previousTokenOption: Option[Token], token: Token, nextTokenOption: Option[Token]): IntertokenFormatInstruction = {
     val previousTypeOption = previousTokenOption map { _.tokenType }

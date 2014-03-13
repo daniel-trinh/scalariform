@@ -80,7 +80,7 @@ class ScalaParser(tokens: Array[Token]) {
       throw new ScalaParserException("Expected token " + tokenType + " but got " + currentToken)
 
   private def acceptStatSep(): Token = currentTokenType match {
-    case NEWLINE | NEWLINES ⇒ nextToken
+    case NEWLINE | NEWLINES ⇒ nextToken()
     case _                  ⇒ accept(SEMI)
   }
 
@@ -404,7 +404,7 @@ class ScalaParser(tokens: Array[Token]) {
   }
 
   private def mixinQualifierOpt(): Option[TypeExprElement] =
-    if (LBRACKET) Some(TypeExprElement(typeElementFlatten3(inBrackets(ident)))) else None
+    if (LBRACKET) Some(TypeExprElement(typeElementFlatten3(inBrackets(ident())))) else None
 
   private def stableId(): List[Token] = path(thisOK = false, typeOK = false)
 
@@ -545,7 +545,7 @@ class ScalaParser(tokens: Array[Token]) {
             val (lbrace, block_, rbrace) = inBraces(block())
             makeExpr(BlockExpr(lbrace, Right(block_), rbrace))
           case LPAREN ⇒ makeExpr(inParens(expr()))
-          case _      ⇒ expr
+          case _      ⇒ expr()
         }
         val catchClauseOption: Option[CatchClause] =
           if (!CATCH)
@@ -1651,7 +1651,7 @@ class ScalaParser(tokens: Array[Token]) {
   private def templateStatSeq(): StatSeq = {
     val statAndStatSeps = ListBuffer[(Option[Stat], Option[Token])]()
 
-    var selfReferenceOpt = if (isExprIntro) {
+    val selfReferenceOpt = if (isExprIntro) {
       val expr_ = expr(InTemplate)
       if (ARROW) {
         val arrowToken = nextToken()
@@ -1937,7 +1937,7 @@ class ScalaParser(tokens: Array[Token]) {
 
   private def xmlLiteralPattern() = xml(isPattern = true)
 
-  private var tokensArray: Array[Token] = tokens.toArray
+  private val tokensArray: Array[Token] = tokens.toArray
 
   private var pos = 0
 
@@ -1962,6 +1962,7 @@ class ScalaParser(tokens: Array[Token]) {
 
   private def lookahead(n: Int): TokenType = this(pos + n).tokenType
 
+  import scala.language.implicitConversions
   private implicit def tokenType2Boolean(tokenType: TokenType): Boolean = currentTokenType == tokenType
 
   private def caseClass = CASE && lookahead(1) == CLASS
@@ -1978,7 +1979,7 @@ class ScalaParser(tokens: Array[Token]) {
 
   private def isVariableName(name: String): Boolean = {
     val first = name(0)
-    ((first.isLower && first.isLetter) || first == '_')
+    (first.isLower && first.isLetter) || first == '_'
   }
 
   private def isVarPattern(token: Token) = {
@@ -2031,13 +2032,15 @@ object ScalaParser {
    */
   def parse(text: String, scalaVersion: String = ScalaVersions.DEFAULT_VERSION): Option[AstNode] = {
     val parser = new ScalaParser(ScalaLexer.tokenise(text, scalaVersion = scalaVersion).toArray)
-    parser.safeParse(parser.compilationUnitOrScript)
+    parser.safeParse(parser.compilationUnitOrScript())
   }
 
   trait ExprElementFlattenable { def elements: List[ExprElement] }
+  //@see https://issues.scala-lang.org/browse/SI-7629
+  private type ExprFlattenableView[A] = A ⇒ ExprElementFlattenable
   case class ExprElements(elements: List[ExprElement]) extends ExprElementFlattenable
-  def exprElementFlatten[T <% ExprElementFlattenable]: (T ⇒ List[ExprElement]) = t ⇒ { exprElementFlatten2(t) }
-  def exprElementFlatten2[T <% ExprElementFlattenable](t: T): List[ExprElement] = groupGeneralTokens(t.elements)
+  def exprElementFlatten[T: ExprFlattenableView]: (T ⇒ List[ExprElement]) = t ⇒ { exprElementFlatten2(t) }
+  def exprElementFlatten2[T: ExprFlattenableView](t: T): List[ExprElement] = groupGeneralTokens(t.elements)
   def groupGeneralTokens(xs: List[ExprElement]): List[ExprElement] = {
     val eq = (x: ExprElement, y: ExprElement) ⇒ (x, y) match {
       case (GeneralTokens(_), GeneralTokens(_)) ⇒ true
@@ -2059,44 +2062,53 @@ object ScalaParser {
     }
   }
 
-  implicit def tokenToExprFlattenable(token: Token): ExprElementFlattenable = GeneralTokens(List(token))
-  implicit def listOfTokenToExprFlattenable(tokens: List[Token]): ExprElementFlattenable = GeneralTokens(tokens)
-  implicit def exprToExprFlattenable(expr: Expr): ExprElementFlattenable = expr.contents
-  implicit def exprElementToExprFlattenable(exprElement: ExprElement): ExprElementFlattenable = ExprElements(List(exprElement))
-  implicit def ordinaryPairToExprFlattenable[A <% ExprElementFlattenable, B <% ExprElementFlattenable](pair: (A, B)): ExprElementFlattenable =
-    ExprElements(pair._1.elements ::: pair._2.elements)
-  implicit def tripleToExprFlattenable[A <% ExprElementFlattenable, B <% ExprElementFlattenable, C <% ExprElementFlattenable](triple: (A, B, C)): ExprElementFlattenable =
-    ExprElements(triple._1.elements ::: triple._2.elements ::: triple._3.elements)
-  implicit def eitherToExprFlattenable[A <% ExprElementFlattenable, B <% ExprElementFlattenable](either: Either[A, B]): ExprElementFlattenable = ExprElements(either match {
-    case Left(x)  ⇒ x.elements
-    case Right(x) ⇒ x.elements
-  })
-  implicit def optionToExprFlattenable[T <% ExprElementFlattenable](option: Option[T]): ExprElementFlattenable = option.toList
-  implicit def listToExprFlattenable[T <% ExprElementFlattenable](list: List[T]): ExprElementFlattenable = ExprElements(list flatMap { _.elements })
-  implicit def vectorToExprFlattenable[T <% ExprElementFlattenable](vector: Vector[T]): ExprElementFlattenable = ExprElements(vector.toList flatMap { _.elements })
+  implicit class TokenToExprFlattenable(token: Token) extends ExprElementToExprFlattenable(GeneralTokens(List(token)))
+  implicit class ListOfTokenToExprFlattenable(tokens: List[Token]) extends ExprElementToExprFlattenable(GeneralTokens(tokens))
+  implicit class ExprToExprFlattenable(expr: Expr) extends ListToExprFlattenable(expr.contents)
+  implicit class ExprElementToExprFlattenable(exprElement: ExprElement) extends ExprElements(List(exprElement))
+  implicit class OrdinaryPairToExprFlattenable[A, B](pair: (A, B))
+                                                    (implicit e1: ExprFlattenableView[A], e2: ExprFlattenableView[B])
+    extends ExprElements(e1(pair._1).elements ::: e2(pair._2).elements)
+  implicit class TripleToExprFlattenable[A, B, C](triple: (A, B, C))
+                                                 (implicit e1: ExprFlattenableView[A], e2: ExprFlattenableView[B], e3: ExprFlattenableView[C])
+    extends ExprElements(e1(triple._1).elements ::: e2(triple._2).elements ::: e3(triple._3).elements)
+  implicit class EitherToExprFlattenable[A, B](either: Either[A, B])
+                                              (implicit e1: ExprFlattenableView[A], e2: ExprFlattenableView[B])
+    extends ExprElements(either match {
+      case Left(x)  ⇒ e1(x).elements
+      case Right(x) ⇒ e2(x).elements
+    })
+  implicit class OptionToExprFlattenable[T: ExprFlattenableView](option: Option[T]) extends ListToExprFlattenable(option.toList)
+  implicit class ListToExprFlattenable[T: ExprFlattenableView](list: List[T]) extends ExprElements(list flatMap { _.elements })
+  implicit class VectorToExprFlattenable[T: ExprFlattenableView](vector: Vector[T]) extends ExprElements(vector.toList flatMap { _.elements })
 
   def makeExpr(flattenables: ExprElementFlattenable*): Expr =
     Expr(flattenables.toList flatMap { _.elements })
 
   trait TypeElementFlattenable { def elements: List[TypeElement] }
-  case class TypeElements(val elements: List[TypeElement]) extends TypeElementFlattenable
-  def typeElementFlatten[T <% TypeElementFlattenable]: (T ⇒ List[TypeElement]) = _.elements
-  def typeElementFlatten2[T <% TypeElementFlattenable](t: T): List[TypeElement] = t.elements
+  case class TypeElements(elements: List[TypeElement]) extends TypeElementFlattenable
+  //@see https://issues.scala-lang.org/browse/SI-7629
+  private type TypeFlattenableView[A] = A ⇒ TypeElementFlattenable
+  def typeElementFlatten[T: TypeFlattenableView]: (T ⇒ List[TypeElement]) = _.elements
+  def typeElementFlatten2[T: TypeFlattenableView](t: T): List[TypeElement] = t.elements
   def typeElementFlatten3(flattenables: TypeElementFlattenable*): List[TypeElement] = flattenables.toList flatMap { _.elements }
-  implicit def tokenToTypeFlattenable(token: Token): TypeElementFlattenable = GeneralTokens(List(token))
-  implicit def listOfTokenToTypeFlattenable(tokens: List[Token]): TypeElementFlattenable = GeneralTokens(tokens)
-  implicit def typeElementToTypeFlattenable(typeElement: TypeElement): TypeElementFlattenable = TypeElements(List(typeElement))
-  implicit def eitherToTypeFlattenable[A <% TypeElementFlattenable, B <% TypeElementFlattenable](either: Either[A, B]): TypeElementFlattenable = TypeElements(either match {
-    case Left(x)  ⇒ x.elements
-    case Right(x) ⇒ x.elements
-  })
-  implicit def pairToTypeFlattenable[A <% TypeElementFlattenable, B <% TypeElementFlattenable](pair: (A, B)): TypeElementFlattenable =
-    TypeElements(pair._1.elements ::: pair._2.elements)
-  implicit def tripleToTypeFlattenable[A <% TypeElementFlattenable, B <% TypeElementFlattenable, C <% TypeElementFlattenable](triple: (A, B, C)): TypeElementFlattenable =
-    TypeElements(triple._1.elements ::: triple._2.elements ::: triple._3.elements)
-  implicit def optionToTypeFlattenable[T <% TypeElementFlattenable](option: Option[T]): TypeElementFlattenable = option.toList
-  implicit def listToTypeFlattenable[T <% TypeElementFlattenable](list: List[T]): TypeElementFlattenable = TypeElements(list flatMap { _.elements })
-
+  implicit class TokenToTypeFlattenable(token: Token) extends TypeElementToTypeFlattenable(GeneralTokens(List(token)))
+  implicit class ListOfTokenToTypeFlattenable(tokens: List[Token]) extends TypeElementToTypeFlattenable(GeneralTokens(tokens))
+  implicit class TypeElementToTypeFlattenable(typeElement: TypeElement) extends TypeElements(List(typeElement))
+  implicit class EitherToTypeFlattenable[A, B](either: Either[A, B])
+                                              (implicit e1: TypeFlattenableView[A], e2: TypeFlattenableView[B])
+    extends TypeElements(either match {
+      case Left(x)  ⇒ e1(x).elements
+      case Right(x) ⇒ e2(x).elements
+    })
+  implicit class PairToTypeFlattenable[A, B](pair: (A, B))
+                                            (implicit e1: TypeFlattenableView[A], e2: TypeFlattenableView[B])
+    extends TypeElements(e1(pair._1).elements ::: e2(pair._2).elements)
+  implicit class TripleToTypeFlattenable[A, B, C](triple: (A, B, C))
+                                                 (implicit e1: TypeFlattenableView[A], e2: TypeFlattenableView[B], e3: TypeFlattenableView[C])
+    extends TypeElements(e1(triple._1).elements ::: e2(triple._2).elements ::: e3(triple._3).elements)
+  implicit class OptionToTypeFlattenable[T: TypeFlattenableView](option: Option[T]) extends ListToTypeFlattenable(option.toList)
+  implicit class ListToTypeFlattenable[T: TypeFlattenableView](list: List[T]) extends TypeElements(list flatMap { _.elements })
 }
 
 // Not AST nodes, used as an intermediate structures during parsing:
@@ -2106,4 +2118,3 @@ case class TemplateOpt(templateInheritanceSectionOpt: Option[TemplateInheritance
 case class PrePackageBlock(name: CallExpr, newlineOpt: Option[Token], lbrace: Token, topStats: StatSeq, rbrace: Token) {
   def complete(packageToken: Token) = PackageBlock(packageToken, name, newlineOpt, lbrace, topStats, rbrace)
 }
-

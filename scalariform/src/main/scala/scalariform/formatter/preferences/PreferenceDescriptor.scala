@@ -65,7 +65,7 @@ object AllPreferences {
     PreserveSpaceBeforeArguments, AlignParameters, AlignArguments, DoubleIndentClassDeclaration, FormatXml, IndentPackageBlocks,
     AlignSingleLineCaseStatements, AlignSingleLineCaseStatements.MaxArrowIndent, IndentLocalDefs, PreserveDanglingCloseParenthesis,
     SpaceInsideParentheses, SpaceInsideBrackets, SpacesWithinPatternBinders, MultilineScaladocCommentsStartOnFirstLine, IndentWithTabs,
-    CompactControlReadability, PlaceScaladocAsterisksBeneathSecondAsterisk, SpacesAroundMultiImports)
+    ScaladocCommentsStopOnLastLine, CompactControlReadability, PlaceScaladocAsterisksBeneathSecondAsterisk, SpacesAroundMultiImports)
 
   val preferencesByKey: Map[String, PreferenceDescriptor[_]] = {
     var map: Map[String, PreferenceDescriptor[_]] = Map()
@@ -185,6 +185,12 @@ case object SpacesWithinPatternBinders extends BooleanPreferenceDescriptor {
 case object MultilineScaladocCommentsStartOnFirstLine extends BooleanPreferenceDescriptor {
   val key = "multilineScaladocCommentsStartOnFirstLine"
   val description = "Start multiline Scaladoc comment body on same line as the opening '/**' "
+  val defaultValue = false
+}
+
+case object ScaladocCommentsStopOnLastLine extends BooleanPreferenceDescriptor {
+  val key = "scaladocCommentsStopOnLastLine"
+  val description = "Place '*/' in last line of Scaladoc comment body (without creating new line)"
   val defaultValue = false
 }
 

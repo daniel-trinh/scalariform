@@ -3,45 +3,42 @@ package scalariform.lexer
 import scalariform._
 import scalariform.lexer.Tokens._
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.TestFailedException
-import org.scalatest.TestPendingException
-import java.io._
+import org.scalatest.Matchers
 
-class ScalaLexerTest extends FlatSpec with ShouldMatchers {
+class ScalaLexerTest extends FlatSpec with Matchers {
 
-  implicit def string2TestString(s: String)(implicit forgiveErrors: Boolean = false, scalaVersion: ScalaVersion = ScalaVersions.DEFAULT) =
-    new TestString(s, forgiveErrors, scalaVersion)
+  implicit class String2TestString(s: String)(implicit forgiveErrors: Boolean = false, scalaVersion: ScalaVersion = ScalaVersions.DEFAULT)
+    extends TestString(s, forgiveErrors, scalaVersion)
 
   "" producesTokens ()
 
-  "println" producesTokens (VARID)
+  "println" producesTokens VARID
 
-  "lazy" producesTokens (LAZY)
+  "lazy" producesTokens LAZY
 
   "println;println" producesTokens (VARID, SEMI, VARID)
 
-  "foo_+" producesTokens (VARID)
+  "foo_+" producesTokens VARID
 
-  "++" producesTokens (VARID)
+  "++" producesTokens VARID
 
-  "*=" producesTokens (VARID)
+  "*=" producesTokens VARID
 
-  "/" producesTokens (VARID)
+  "/" producesTokens VARID
 
   "foo/bar" producesTokens (VARID, VARID, VARID)
 
-  "*/" producesTokens (VARID)
+  "*/" producesTokens VARID
 
-  "*/+" producesTokens (VARID)
+  "*/+" producesTokens VARID
 
   "foo  bar   baz" producesTokens (VARID, WS, VARID, WS, VARID)
 
-  "  " producesTokens (WS)
+  "  " producesTokens WS
 
-  "// comment" producesTokens (LINE_COMMENT)
+  "// comment" producesTokens LINE_COMMENT
 
-  "//" producesTokens (LINE_COMMENT)
+  "//" producesTokens LINE_COMMENT
 
   "foo// comment" producesTokens (VARID, LINE_COMMENT)
 
@@ -52,61 +49,61 @@ class ScalaLexerTest extends FlatSpec with ShouldMatchers {
 
   "foo/* comment */bar" producesTokens (VARID, MULTILINE_COMMENT, VARID)
 
-  "/* bar /* baz */ var */" producesTokens (MULTILINE_COMMENT)
+  "/* bar /* baz */ var */" producesTokens MULTILINE_COMMENT
 
-  "/**/" producesTokens (MULTILINE_COMMENT)
+  "/**/" producesTokens MULTILINE_COMMENT
 
-  "`yield`" producesTokens (VARID)
+  "`yield`" producesTokens VARID
 
-  """"foobar"""" producesTokens (STRING_LITERAL)
+  """"foobar"""" producesTokens STRING_LITERAL
 
-  "\"\"\"f\"o\"o\"\"\"" producesTokens (STRING_LITERAL)
+  "\"\"\"f\"o\"o\"\"\"" producesTokens STRING_LITERAL
 
-  """"\""""" producesTokens (STRING_LITERAL)
+  """"\""""" producesTokens STRING_LITERAL
 
-  "\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"" producesTokens (STRING_LITERAL)
+  "\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"" producesTokens STRING_LITERAL
 
   "foo.bar.baz" producesTokens (VARID, DOT, VARID, DOT, VARID)
 
-  ".1234" producesTokens (FLOATING_POINT_LITERAL)
-  ".1234e2" producesTokens (FLOATING_POINT_LITERAL)
-  ".1234e+2" producesTokens (FLOATING_POINT_LITERAL)
-  ".1e-2" producesTokens (FLOATING_POINT_LITERAL)
-  ".1e+2345f" producesTokens (FLOATING_POINT_LITERAL)
-  ".1e+2345d" producesTokens (FLOATING_POINT_LITERAL)
+  ".1234" producesTokens FLOATING_POINT_LITERAL
+  ".1234e2" producesTokens FLOATING_POINT_LITERAL
+  ".1234e+2" producesTokens FLOATING_POINT_LITERAL
+  ".1e-2" producesTokens FLOATING_POINT_LITERAL
+  ".1e+2345f" producesTokens FLOATING_POINT_LITERAL
+  ".1e+2345d" producesTokens FLOATING_POINT_LITERAL
 
-  "100" producesTokens (INTEGER_LITERAL)
-  "1" producesTokens (INTEGER_LITERAL)
-  "1L" producesTokens (INTEGER_LITERAL)
-  "0" producesTokens (INTEGER_LITERAL)
-  "0L" producesTokens (INTEGER_LITERAL)
-  "0x2345" producesTokens (INTEGER_LITERAL)
-  "0x" producesTokens (INTEGER_LITERAL)
-  "0x32413L" producesTokens (INTEGER_LITERAL)
+  "100" producesTokens INTEGER_LITERAL
+  "1" producesTokens INTEGER_LITERAL
+  "1L" producesTokens INTEGER_LITERAL
+  "0" producesTokens INTEGER_LITERAL
+  "0L" producesTokens INTEGER_LITERAL
+  "0x2345" producesTokens INTEGER_LITERAL
+  "0x" producesTokens INTEGER_LITERAL
+  "0x32413L" producesTokens INTEGER_LITERAL
   "1Lfoo" producesTokens (INTEGER_LITERAL, VARID)
   "0x1Lfoo" producesTokens (INTEGER_LITERAL, VARID)
 
-  "0.1234" producesTokens (FLOATING_POINT_LITERAL)
-  "0.1234e2" producesTokens (FLOATING_POINT_LITERAL)
-  "0.1234e+2" producesTokens (FLOATING_POINT_LITERAL)
-  "0.1e-2" producesTokens (FLOATING_POINT_LITERAL)
-  "0.1e+2345f" producesTokens (FLOATING_POINT_LITERAL)
-  "0.1e+2345d" producesTokens (FLOATING_POINT_LITERAL)
+  "0.1234" producesTokens FLOATING_POINT_LITERAL
+  "0.1234e2" producesTokens FLOATING_POINT_LITERAL
+  "0.1234e+2" producesTokens FLOATING_POINT_LITERAL
+  "0.1e-2" producesTokens FLOATING_POINT_LITERAL
+  "0.1e+2345f" producesTokens FLOATING_POINT_LITERAL
+  "0.1e+2345d" producesTokens FLOATING_POINT_LITERAL
 
-  "10e2" producesTokens (FLOATING_POINT_LITERAL)
-  "10e+2" producesTokens (FLOATING_POINT_LITERAL)
-  "10e-2" producesTokens (FLOATING_POINT_LITERAL)
-  "10e+2345f" producesTokens (FLOATING_POINT_LITERAL)
-  "10e+2345d" producesTokens (FLOATING_POINT_LITERAL)
+  "10e2" producesTokens FLOATING_POINT_LITERAL
+  "10e+2" producesTokens FLOATING_POINT_LITERAL
+  "10e-2" producesTokens FLOATING_POINT_LITERAL
+  "10e+2345f" producesTokens FLOATING_POINT_LITERAL
+  "10e+2345d" producesTokens FLOATING_POINT_LITERAL
 
   "22.`yield`" producesTokens (INTEGER_LITERAL, DOT, VARID)
   "42.toString" producesTokens (INTEGER_LITERAL, DOT, VARID)
 
   {
     implicit val scalaVersion = ScalaVersions.Scala_2_9
-    "5.f" producesTokens (FLOATING_POINT_LITERAL)
-    "5.d" producesTokens (FLOATING_POINT_LITERAL)
-    "5." producesTokens (FLOATING_POINT_LITERAL)
+    "5.f" producesTokens FLOATING_POINT_LITERAL
+    "5.d" producesTokens FLOATING_POINT_LITERAL
+    "5." producesTokens FLOATING_POINT_LITERAL
   }
 
   {
@@ -138,22 +135,22 @@ class ScalaLexerTest extends FlatSpec with ShouldMatchers {
 
   }
 
-  "'f'" producesTokens (CHARACTER_LITERAL)
-  """'\n'""" producesTokens (CHARACTER_LITERAL)
-  """'\025'""" producesTokens (CHARACTER_LITERAL)
+  "'f'" producesTokens CHARACTER_LITERAL
+  """'\n'""" producesTokens CHARACTER_LITERAL
+  """'\025'""" producesTokens CHARACTER_LITERAL
 
-  "'symbol" producesTokens (SYMBOL_LITERAL)
-  "'yield" producesTokens (SYMBOL_LITERAL)
+  "'symbol" producesTokens SYMBOL_LITERAL
+  "'yield" producesTokens SYMBOL_LITERAL
 
   "private val tokenTextBuffer = new StringBuilder" producesTokens (PRIVATE, WS, VAL, WS, VARID, WS, EQUALS, WS, NEW, WS, VARID)
 
   """println("bob")
 println("foo")""" producesTokens (VARID, LPAREN, STRING_LITERAL, RPAREN, WS, VARID, LPAREN, STRING_LITERAL, RPAREN)
 
-  "\\u0061" producesTokens (VARID)
-  "\\uuuuuuuuuuuuuuuuuuuuuuuuu0061" producesTokens (VARID)
-  "\"\\u0061\"" producesTokens (STRING_LITERAL)
-  "\"\\u000a\"" producesTokens (STRING_LITERAL)
+  "\\u0061" producesTokens VARID
+  "\\uuuuuuuuuuuuuuuuuuuuuuuuu0061" producesTokens VARID
+  "\"\\u0061\"" producesTokens STRING_LITERAL
+  "\"\\u000a\"" producesTokens STRING_LITERAL
 
   "<foo />" producesTokens (XML_START_OPEN, XML_NAME, XML_WHITESPACE, XML_EMPTY_CLOSE)
   "<foo></foo>" producesTokens (XML_START_OPEN, XML_NAME, XML_TAG_CLOSE, XML_END_OPEN, XML_NAME, XML_TAG_CLOSE)
@@ -192,19 +189,19 @@ println("foo")""" producesTokens (VARID, LPAREN, STRING_LITERAL, RPAREN, WS, VAR
 
   "<a><!-- comment --></a>" producesTokens (XML_START_OPEN, XML_NAME, XML_TAG_CLOSE, XML_COMMENT, XML_END_OPEN, XML_NAME, XML_TAG_CLOSE)
 
-  "<![CDATA[<greeting>Hello, world!</greeting>]]>" producesTokens (XML_CDATA)
+  "<![CDATA[<greeting>Hello, world!</greeting>]]>" producesTokens XML_CDATA
 
   "3 + <!-- foo --> + 4" producesTokens (INTEGER_LITERAL, WS, PLUS, WS, XML_COMMENT, WS, PLUS, WS, INTEGER_LITERAL)
 
   "<a>{{ = }}</a>" producesTokens (XML_START_OPEN, XML_NAME, XML_TAG_CLOSE, XML_PCDATA, XML_END_OPEN, XML_NAME, XML_TAG_CLOSE)
 
-  "0X1234" producesTokens (INTEGER_LITERAL)
+  "0X1234" producesTokens INTEGER_LITERAL
 
-  """<xml:unparsed>&<<>""^%@$!#</xml:unparsed>""" producesTokens (XML_UNPARSED)
+  """<xml:unparsed>&<<>""^%@$!#</xml:unparsed>""" producesTokens XML_UNPARSED
   """3 + <xml:unparsed>&<<>""^%@$!#</xml:unparsed> + 3""" producesTokens (INTEGER_LITERAL, WS, PLUS, WS, XML_UNPARSED, WS, PLUS, WS,
     INTEGER_LITERAL)
 
-  """<?this is a pi foo bar = && {{ ?>""" producesTokens (XML_PROCESSING_INSTRUCTION)
+  """<?this is a pi foo bar = && {{ ?>""" producesTokens XML_PROCESSING_INSTRUCTION
 
   """<foo/>
      
@@ -218,9 +215,9 @@ println("foo")""" producesTokens (VARID, LPAREN, STRING_LITERAL, RPAREN, WS, VAR
 
   "for(<book/><-Nil)Nil" producesTokens (FOR, LPAREN, XML_START_OPEN, XML_NAME, XML_EMPTY_CLOSE, LARROW, VARID, RPAREN, VARID)
 
-  "\"\\u001A\"" producesTokens (STRING_LITERAL)
+  "\"\\u001A\"" producesTokens STRING_LITERAL
 
-  "\"\"\"\\u001A\"\"\"" producesTokens (STRING_LITERAL)
+  "\"\"\"\\u001A\"\"\"" producesTokens STRING_LITERAL
 
   "foo+\\u0061+bar" producesTokens (VARID, PLUS, VARID, PLUS, VARID)
 
@@ -230,22 +227,21 @@ println("foo")""" producesTokens (VARID, LPAREN, STRING_LITERAL, RPAREN, WS, VAR
   "-5 max(2)" producesTokens (MINUS, INTEGER_LITERAL, WS, VARID, LPAREN, INTEGER_LITERAL, RPAREN)
 
   "Lexer" should "throw a lexer exception" in {
-    evaluating { ScalaLexer.rawTokenise("\"\"\"") } should produce[ScalaLexerException]
-    evaluating { ScalaLexer.rawTokenise("<?") } should produce[ScalaLexerException]
-    evaluating { ScalaLexer.rawTokenise("<xml:unparsed>") } should produce[ScalaLexerException]
+    an[ScalaLexerException] should be thrownBy { ScalaLexer.rawTokenise("\"\"\"") }
+    an[ScalaLexerException] should be thrownBy { ScalaLexer.rawTokenise("<?") }
+    an[ScalaLexerException] should be thrownBy { ScalaLexer.rawTokenise("<xml:unparsed>") }
   }
 
   {
     implicit val forgiveErrors = true
 
-    "\"\"\"" producesTokens (STRING_LITERAL)
-    "'" producesTokens (CHARACTER_LITERAL)
-    "\"unclosed" producesTokens (STRING_LITERAL)
-    "\\ufoob" producesTokens (WS)
-    "`unclosed" producesTokens (VARID)
-    "<?" producesTokens (XML_PROCESSING_INSTRUCTION)
-    "<xml:unparsed>" producesTokens (XML_UNPARSED)
-
+    "\"\"\"" producesTokens STRING_LITERAL
+    "'" producesTokens CHARACTER_LITERAL
+    "\"unclosed" producesTokens STRING_LITERAL
+    "\\ufoob" producesTokens WS
+    "`unclosed" producesTokens VARID
+    "<?" producesTokens XML_PROCESSING_INSTRUCTION
+    "<xml:unparsed>" producesTokens XML_UNPARSED
   }
 
   class TestString(s: String, forgiveErrors: Boolean = false, scalaVersion: ScalaVersion = ScalaVersions.DEFAULT) {
@@ -265,7 +261,5 @@ println("foo")""" producesTokens (VARID, LPAREN, STRING_LITERAL, RPAREN, WS, VAR
         require(s == reconstitutedSource, "tokens do not partition text correctly: " + s + " vs " + reconstitutedSource)
       }
     }
-
   }
-
 }

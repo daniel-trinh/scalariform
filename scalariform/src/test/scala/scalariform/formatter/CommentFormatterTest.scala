@@ -1,7 +1,6 @@
 package scalariform.formatter
 
 import scalariform.parser._
-import scalariform.formatter._
 import scalariform.formatter.preferences._
 
 // format: OFF
@@ -133,6 +132,37 @@ class CommentFormatterTest extends AbstractFormatterTest {
     |"""
   }
   
+  {
+  implicit val formattingPreferences = FormattingPreferences
+    .setPreference(MultilineScaladocCommentsStartOnFirstLine, true)
+    .setPreference(ScaladocCommentsStopOnLastLine, true)
+
+  """/** This method applies f to each
+    | *  element of the given list.
+    | */""" ==>
+  """/** This method applies f to each
+    | *  element of the given list. */
+    |"""
+
+  """/** Foo
+    |Bar
+    |*Baz  */""" ==>
+  """/** Foo
+    | *  Bar
+    | *  Baz */
+    |"""
+
+  """/** Foo
+    |*/""" ==>
+  """/** Foo */
+    |"""
+
+  """/**
+    |*/""" ==>
+  """/** */
+    |"""
+  }
+
   {
   implicit val formattingPreferences = FormattingPreferences.setPreference(PlaceScaladocAsterisksBeneathSecondAsterisk, true)
 

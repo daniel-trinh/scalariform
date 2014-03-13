@@ -1,23 +1,19 @@
 package scalariform.formatter
 
-import scalariform.parser._
 import scalariform.lexer._
 import scalariform.formatter.preferences._
-import scala.util.parsing.input._
-import scala.util.parsing.combinator._
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.TestFailedException
-import org.scalatest.TestPendingException
+import org.scalatest.Matchers
+import org.scalatest.exceptions.{TestFailedException, TestPendingException}
 import scalariform.ScalaVersions
 
-abstract class AbstractFormatterTest extends FlatSpec with ShouldMatchers with SpecificFormatter {
+abstract class AbstractFormatterTest extends FlatSpec with Matchers with SpecificFormatter {
 
   def prettyPrint(s: String): String =
     //s.replaceAll("\n", "↵\n").replaceAll("\t", "↦" ).replaceAll(" ", "▵")
     s.replaceAll("\n", "¶\n").replaceAll("\t", "↦") //.replaceAll(" ", "▲")
 
-  implicit def string2FormatTest(s: String)(implicit formattingPreferences: IFormattingPreferences = FormattingPreferences(), scalaVersion: String = ScalaVersions.DEFAULT_VERSION): FormatTest =
+  implicit class String2FormatTest(s: String)(implicit formattingPreferences: IFormattingPreferences = FormattingPreferences(), scalaVersion: String = ScalaVersions.DEFAULT_VERSION) extends
     FormatTest(s.stripMargin, formattingPreferences, scalaVersion)
 
   def testFailedException(message: String) = new TestFailedException(message = Some(message), cause = None, failedCodeStackDepth = 2)
