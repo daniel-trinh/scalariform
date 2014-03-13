@@ -1,11 +1,11 @@
 package scalariform.formatter
 
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import FormatterDirectiveParser.getDirectives
 
 // format: +preserveSpaceBeforeArguments
-class FormatterDirectiveParserTest extends FlatSpec with ShouldMatchers {
+class FormatterDirectiveParserTest extends FlatSpec with Matchers {
 
   it should "parse formatter ON/OFF instructions" in {
     "format: ON " ==> ToggleFormatting(true)
@@ -25,7 +25,7 @@ class FormatterDirectiveParserTest extends FlatSpec with ShouldMatchers {
     "blahformat: -rewriteArrowSymbols, +spaceBeforeColon\nblah" ==> (ToggleOption(false, "rewriteArrowSymbols"), ToggleOption(true, "spaceBeforeColon"))
   }
 
-  implicit def string2FormatTest(s: String): FormatTest = FormatTest(s.stripMargin)
+  implicit class String2FormatTest(s: String) extends FormatTest(s.stripMargin)
 
   case class FormatTest(source: String) {
     def ==>(expectedDirectives: FormatterDirective*) {

@@ -60,7 +60,7 @@ class ParseTreeModel(rootAstNode: AstNode) extends TreeModel {
 
   case class OptionNode(name: String, opt: Option[Any]) extends TreeNode(name) {
 
-    lazy val children = opt map { x ⇒ makeTreeNode(x, "Some") } toList
+    lazy val children = opt.map{ x ⇒ makeTreeNode(x, "Some") }.toList
 
   }
 

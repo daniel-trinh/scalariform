@@ -1,30 +1,28 @@
 package scalariform.lexer
 
 import scalariform._
-import scalariform.lexer.Tokens._
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.TestFailedException
-import org.scalatest.TestPendingException
+import org.scalatest.Matchers
 import scalariform.utils.Utils._
 
-class RedundantSemicolonDetectorTest extends FlatSpec with ShouldMatchers {
+class RedundantSemicolonDetectorTest extends FlatSpec with Matchers {
 
-  implicit def stringToCheckable(s: String)(implicit scalaVersion: String = ScalaVersions.DEFAULT_VERSION) =
-    new { def check() = checkSemis(s, scalaVersion) }; // Expected redundant semicolons are indicated with <;>
+  implicit class StringToCheckable(s: String)(implicit scalaVersion: String = ScalaVersions.DEFAULT_VERSION) {
+    def check() = checkSemis(s, scalaVersion)
+  }
 
   """
     class A { 
       def foo = 42<;>
       def bar = 123; def baz = 1234 
     }<;>
-  """.check();
+  """.check()
 
   """
     { 
       println("Foo")<;>
     }
-  """.check();
+  """.check()
 
   """
     class A { 
@@ -36,10 +34,10 @@ class RedundantSemicolonDetectorTest extends FlatSpec with ShouldMatchers {
   """.check()
 
   {
-    implicit val scalaVersion = "2.10.0";
+    implicit val scalaVersion = "2.10.0"
     """
       s"my name is ${person.name<;>}"
-    """.check
+    """.check()
   }
 
   private def checkSemis(encodedSource: String, scalaVersion: String) {

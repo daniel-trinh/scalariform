@@ -1,10 +1,10 @@
 package scalariform.utils
 
 import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 
 // format: +preserveSpaceBeforeArguments
-class TextEditTest extends FlatSpec with ShouldMatchers {
+class TextEditTest extends FlatSpec with Matchers {
 
   import TextEditProcessor.runEdits
 

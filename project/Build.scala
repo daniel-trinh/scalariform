@@ -7,7 +7,7 @@ import com.typesafe.sbt.SbtScalariform
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import scalariform.formatter.preferences._
 
-object ScalariformBuild extends Build {
+object Build extends sbt.Build {
    
    // This is to make sure nobody tries to compile with 1.6 as the target JDK. 
    // Not clear if this will actually work on 1.8, needs to be tested when that is out.
@@ -27,14 +27,12 @@ object ScalariformBuild extends Build {
     version := "0.1.5-SNAPSHOT",
     scalaVersion := "2.10.3",
     crossScalaVersions := Seq(
-      "2.11.0-M8",
-      "2.11.0-M7",
-      "2.10.0", "2.10.1",
-      "2.9.3", "2.9.2", "2.9.1-1", "2.9.1", "2.9.0-1", "2.9.0"
+      "2.11.0-RC1",
+      "2.10.0", "2.10.1"
     ),
     exportJars := true, // Needed for cli oneJar
     retrieveManaged := true,
-    scalacOptions += "-deprecation",
+    scalacOptions := Seq("-deprecation", "-feature"),
     EclipseKeys.withSource := true,
     EclipseKeys.eclipseOutput := Some("bin"))
 
@@ -49,30 +47,24 @@ object ScalariformBuild extends Build {
     publishLocal := ())) aggregate (scalariform, cli, misc)
 
   implicit class Regex(sc: StringContext) {
-    def r = new util.matching.Regex(sc.parts.mkString, sc.parts.tail.map(_ => "x"): _*)
+    def r = new util.matching.Regex(sc.parts.mkString, sc.parts.tail.map(_ ⇒ "x"): _*)
   }
 
-  def getScalaTestDependency(scalaVersion: String) = scalaVersion match {
-    case "2.11.0-M8" ⇒ "org.scalatest" %% s"scalatest"  % "2.1.RC1" % "test"
-    case "2.11.0-M7" ⇒ "org.scalatest" %% s"scalatest"  % "2.0.1-SNAP4" % "test"
-    case r"2.10.\d+" ⇒ "org.scalatest" %  "scalatest_2.10" % "2.0"   % "test"
-    case "2.9.3"     ⇒ "org.scalatest" %% "scalatest"      % "1.9.1" % "test"
-    case _           ⇒ "org.scalatest" %% "scalatest"      % "1.7.2" % "test"
-  }
+  val scalaTestDependency = "org.scalatest" %% s"scalatest"  % "2.1.0" % "test"
 
   def get2_11Dependencies(scalaVersion: String): List[ModuleID] = scalaVersion match {
-    case r"2.11.0-M\d" => List(
-      "org.scala-lang.modules" %% "scala-xml" % "1.0.0-RC7",
-      "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.0-RC5"
+    case r"2.11.0.*" ⇒ List(
+      "org.scala-lang.modules" %% "scala-xml" % "1.0.0",
+      "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.0"
     )
-    case _ => Nil
+    case _ ⇒ Nil
   }
 
   lazy val scalariform: Project = Project("scalariform", file("scalariform"), settings =
     subprojectSettings ++ sbtbuildinfo.Plugin.buildInfoSettings ++ eclipseSettings ++
       Seq(
         libraryDependencies <<= (scalaVersion, libraryDependencies) { (sv, deps) ⇒
-          deps ++ get2_11Dependencies(sv) :+ getScalaTestDependency(sv)
+          deps ++ get2_11Dependencies(sv) :+ scalaTestDependency
         },
         testOptions in Test += Tests.Argument("-oI"),
         pomExtra := pomExtraXml,
@@ -97,7 +89,7 @@ object ScalariformBuild extends Build {
       mainClass in (Compile, packageBin) := Some("scalariform.commandline.Main"),
       artifactName in SbtOneJar.oneJar := { (version: ScalaVersion, module: ModuleID, artifact: Artifact) ⇒ "scalariform.jar" },
       publish := (),
-      publishLocal := ())) dependsOn (scalariform)
+      publishLocal := ())) dependsOn scalariform
 
   lazy val misc: Project = Project("misc", file("misc"), settings = subprojectSettings ++
     Seq(
@@ -134,5 +126,4 @@ object ScalariformBuild extends Build {
         <url>https://github.com/daniel-trinh/</url>
       </developer>
     </developers>
-
 }

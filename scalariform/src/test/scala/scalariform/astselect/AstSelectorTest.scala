@@ -1,12 +1,12 @@
 package scalariform.astselect
 
 import org.scalatest._
-import org.scalatest.matchers._
+import org.scalatest.Matchers
 import scalariform.utils.Range
 import scalariform.ScalaVersions
 
 // format: OFF
-class AstSelectorTest extends FlatSpec with ShouldMatchers {
+class AstSelectorTest extends FlatSpec with Matchers {
 
   // Legend:
   //
@@ -319,8 +319,8 @@ class AstSelectorTest extends FlatSpec with ShouldMatchers {
     }
   }
 
-  implicit def stringToTestString(source: String)(implicit scalaVersion: String = ScalaVersions.DEFAULT_VERSION): TestString = new TestString(source, scalaVersion)
-  class TestString(source: String, scalaVersion: String) { 
+  implicit class StringToTestString(source: String)(implicit scalaVersion: String = ScalaVersions.DEFAULT_VERSION) extends TestString(source, scalaVersion)
+  class TestString(source: String, scalaVersion: String) {
     def ~(initialSelectionDiagram: String) = IntermediateTest(source, initialSelectionDiagram, scalaVersion)
   }
 

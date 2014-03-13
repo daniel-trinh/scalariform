@@ -2,15 +2,13 @@ package scalariform.parser
 
 import scalariform.lexer.Tokens._
 import scalariform.lexer._
-import scalariform.utils.Utils._
-import scala.collection.mutable.ListBuffer
 import PartialFunction._
 
 object InferredSemicolonScalaParser {
 
   def findSemicolons(tokens: Array[Token]) = {
     val parser = new InferredSemicolonScalaParser(tokens)
-    parser.safeParse(parser.compilationUnitOrScript)
+    parser.safeParse(parser.compilationUnitOrScript())
     parser.inferredSemicolons
   }
 
@@ -91,7 +89,7 @@ class InferredSemicolonScalaParser(tokens: Array[Token]) {
     case _ ⇒ accept(SEMI)
   }
 
-  private def acceptStatSepOpt() = if (!isStatSeqEnd) acceptStatSep
+  private def acceptStatSepOpt() = if (!isStatSeqEnd) acceptStatSep()
 
   private def isModifier = currentTokenType match {
     case ABSTRACT | FINAL | SEALED | PRIVATE |
@@ -372,7 +370,7 @@ class InferredSemicolonScalaParser(tokens: Array[Token]) {
   }
 
   private def mixinQualifierOpt() {
-    if (LBRACKET) inBrackets(ident)
+    if (LBRACKET) inBrackets(ident())
   }
 
   private def stableId() = path(thisOK = false, typeOK = false)
@@ -496,7 +494,7 @@ class InferredSemicolonScalaParser(tokens: Array[Token]) {
           case LBRACE ⇒
             inBraces(block())
           case LPAREN ⇒ inParens(expr())
-          case _      ⇒ expr
+          case _      ⇒ expr()
         }
         val catchClauseOption =
           if (!CATCH)
@@ -846,7 +844,7 @@ class InferredSemicolonScalaParser(tokens: Array[Token]) {
         case CHARACTER_LITERAL | INTEGER_LITERAL | FLOATING_POINT_LITERAL | STRING_LITERAL | SYMBOL_LITERAL | TRUE | FALSE | NULL ⇒
           literal(inPattern = true)
         case LPAREN ⇒
-          makeParens(noSeq.patterns)
+          makeParens(noSeq.patterns())
         case XML_START_OPEN | XML_COMMENT | XML_CDATA | XML_UNPARSED | XML_PROCESSING_INSTRUCTION ⇒
           xmlLiteralPattern()
         case _ ⇒
@@ -1563,7 +1561,7 @@ class InferredSemicolonScalaParser(tokens: Array[Token]) {
 
   private def xmlLiteralPattern() = xml(isPattern = true)
 
-  private var tokensArray: Array[Token] = tokens.toArray
+  private val tokensArray: Array[Token] = tokens.toArray
 
   private var pos = 0
 
@@ -1588,6 +1586,7 @@ class InferredSemicolonScalaParser(tokens: Array[Token]) {
 
   private def lookahead(n: Int): TokenType = this(pos + n).tokenType
 
+  import scala.language.implicitConversions
   private implicit def tokenType2Boolean(tokenType: TokenType): Boolean = currentTokenType == tokenType
 
   private def caseClass = CASE && lookahead(1) == CLASS
@@ -1605,7 +1604,7 @@ class InferredSemicolonScalaParser(tokens: Array[Token]) {
 
   private def isVariableName(name: String): Boolean = {
     val first = name(0)
-    ((first.isLower && first.isLetter) || first == '_')
+    (first.isLower && first.isLetter) || first == '_'
   }
 
   private def isVarPattern(token: Token) = {

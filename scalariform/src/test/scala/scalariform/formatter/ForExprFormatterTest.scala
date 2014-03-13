@@ -1,8 +1,5 @@
 package scalariform.formatter
 
-import scalariform.parser._
-import scalariform.formatter._
-
 // format: OFF
 class ForExprFormatterTest extends AbstractExpressionFormatterTest {
 

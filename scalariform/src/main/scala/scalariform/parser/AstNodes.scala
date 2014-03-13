@@ -22,18 +22,30 @@ sealed trait AstNode extends CaseClassReflector {
 
   def isEmpty = tokens.isEmpty
 
-  protected implicit def astNodeToFlattenable(node: AstNode): Flattenable = new Flattenable { val tokens = node.tokens }
-  protected implicit def listToFlattenable[T <% Flattenable](list: List[T]): Flattenable = new Flattenable { val tokens = list flatMap { _.tokens } }
-  protected implicit def optionToFlattenable[T <% Flattenable](option: Option[T]): Flattenable = new Flattenable { val tokens = option.toList flatMap { _.tokens } }
-  protected implicit def pairToFlattenable[T1 <% Flattenable, T2 <% Flattenable](pair: (T1, T2)): Flattenable = new Flattenable { val tokens = pair._1.tokens ::: pair._2.tokens }
-  protected implicit def tripleToFlattenable[T1 <% Flattenable, T2 <% Flattenable, T3 <% Flattenable](triple: (T1, T2, T3)): Flattenable = new Flattenable { val tokens = triple._1.tokens ++ triple._2.tokens ++ triple._3.tokens }
-  protected implicit def eitherToFlattenable[T1 <% Flattenable, T2 <% Flattenable](either: T1 Either T2): Flattenable = new Flattenable {
-    val tokens = either match {
+  //@see https://issues.scala-lang.org/browse/SI-7629
+  private type FlattenableView[A] = A => Flattenable
+  protected implicit class AstNodeToFlattenable(node: AstNode) extends Flattenable { val tokens = node.tokens }
+  protected implicit class ListToFlattenable[T: FlattenableView](list: List[T]) extends Flattenable {
+    val tokens: List[Token] = list flatMap { _.tokens }
+  }
+  protected implicit class OptionToFlattenable[T: FlattenableView](option: Option[T]) extends Flattenable {
+    val tokens: List[Token] = option.toList flatMap { _.tokens }
+  }
+  protected implicit class PairToFlattenable[T1: FlattenableView, T2: FlattenableView](pair: (T1, T2)) extends Flattenable {
+    val tokens: List[Token] = pair._1.tokens ::: pair._2.tokens
+  }
+  protected implicit class TripleToFlattenable[T1: FlattenableView, T2: FlattenableView, T3: FlattenableView](triple: (T1, T2, T3)) extends Flattenable {
+    val tokens: List[Token] = triple._1.tokens ++ triple._2.tokens ++ triple._3.tokens
+  }
+  protected implicit class EitherToFlattenable[T1: FlattenableView, T2: FlattenableView](either: T1 Either T2) extends Flattenable {
+    val tokens: List[Token] = either match {
       case Left(f)  ⇒ f.tokens
       case Right(f) ⇒ f.tokens
     }
   }
-  protected implicit def tokenToFlattenable(token: Token): Flattenable = new Flattenable { val tokens = List(token) }
+  protected implicit class TokenToFlattenable(token: Token) extends Flattenable {
+    val tokens: List[Token] = List(token)
+  }
 
   protected def flatten(flattenables: Flattenable*): List[Token] = flattenables.toList flatMap { _.tokens }
 
@@ -43,7 +55,7 @@ sealed trait AstNode extends CaseClassReflector {
     case a: AstNode                ⇒ List(a)
     case t: Token                  ⇒ Nil
     case Some(x)                   ⇒ immediateAstNodes(x)
-    case xs @ (_ :: _)             ⇒ xs flatMap { immediateAstNodes(_) }
+    case xs @ (_ :: _)             ⇒ xs flatMap immediateAstNodes
     case Left(x)                   ⇒ immediateAstNodes(x)
     case Right(x)                  ⇒ immediateAstNodes(x)
     case (l, r)                    ⇒ immediateAstNodes(l) ++ immediateAstNodes(r)
@@ -65,7 +77,7 @@ sealed trait AstNode extends CaseClassReflector {
 
 }
 
-case class GeneralTokens(val toks: List[Token]) extends AstNode with TypeElement with ExprElement {
+case class GeneralTokens(toks: List[Token]) extends AstNode with TypeElement with ExprElement {
   lazy val tokens = flatten(toks)
 }
 

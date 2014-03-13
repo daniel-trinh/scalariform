@@ -102,7 +102,7 @@ trait ExprFormatter { self: HasFormattingPreferences with AnnotationFormatter wi
   }
 
   private def formatExprElements(exprElements: List[ExprElement])(implicit formatterState: FormatterState): (FormatResult, FormatterState) = {
-    if (exprElements flatMap { _.tokens } isEmpty)
+    if (exprElements.flatMap{ _.tokens }.isEmpty)
       return (NoFormatResult, formatterState)
     var formatResult: FormatResult = NoFormatResult
     var currentFormatterState = formatterState
@@ -318,7 +318,7 @@ trait ExprFormatter { self: HasFormattingPreferences with AnnotationFormatter wi
     val alignArgsEnabled = formattingPreferences(AlignArguments) && !formattingPreferences(IndentWithTabs)
     var formatResult: FormatResult = NoFormatResult
 
-    var argumentFormatterState = formatterState
+    val argumentFormatterState = formatterState
     val ParenArgumentExprs(lparen, contents, rparen) = parenArguments
 
     /* Force a newline for the first argument if this is a set of
