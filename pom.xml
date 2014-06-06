@@ -14,12 +14,12 @@
   </scm>
 
   <properties>
-    <tycho.version>0.18.1</tycho.version>
+    <tycho.version>0.20.0</tycho.version>
     <scala.version>2.10.2</scala.version>
     <encoding>UTF-8</encoding>
     <maven.version>3.0.4</maven.version>
-    <scala.binary.version>2.11.0-M5</scala.binary.version>
-    <scala.xml.version>1.0.0-RC5</scala.xml.version>
+    <scala.binary.version>2.11</scala.binary.version>
+    <scala.xml.version>1.0.2</scala.xml.version>
     <version.suffix>2_10</version.suffix>
   </properties>
 
@@ -142,6 +142,20 @@
       <properties>
         <scala.version>2.11.0-SNAPSHOT</scala.version>
         <version.suffix>2_11</version.suffix>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.scala-lang.modules</groupId>
+          <artifactId>scala-xml_${scala.binary.version}</artifactId>
+          <version>${scala.xml.version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>scala-2.12.x</id>
+      <properties>
+        <scala.version>2.12.0-SNAPSHOT</scala.version>
+        <version.suffix>2_12</version.suffix>
       </properties>
       <dependencies>
         <dependency>
