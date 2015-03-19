@@ -65,7 +65,8 @@ object AllPreferences {
     PreserveSpaceBeforeArguments, AlignParameters, AlignArguments, DoubleIndentClassDeclaration, FormatXml, IndentPackageBlocks,
     AlignSingleLineCaseStatements, AlignSingleLineCaseStatements.MaxArrowIndent, IndentLocalDefs, PreserveDanglingCloseParenthesis,
     SpaceInsideParentheses, SpaceInsideBrackets, SpacesWithinPatternBinders, MultilineScaladocCommentsStartOnFirstLine, IndentWithTabs,
-    CompactControlReadability, PlaceScaladocAsterisksBeneathSecondAsterisk, SpacesAroundMultiImports
+    CompactControlReadability, PlaceScaladocAsterisksBeneathSecondAsterisk, SpacesAroundMultiImports, BreakMultipleParameterGroups,
+    BreakMultipleParameterGroups.BreakingThreshold
   )
 
   val preferencesByKey: Map[String, PreferenceDescriptor[_]] = {
@@ -213,4 +214,16 @@ case object SpacesAroundMultiImports extends BooleanPreferenceDescriptor {
   val defaultValue = true
 }
 
+case object BreakMultipleParameterGroups extends BooleanPreferenceDescriptor {
+  val key = "breakMultipleParametersGroups"
+  val description = "Place newline after end of parameter group on multiple parameter group function definition"
+  val defaultValue = false
+
+  case object BreakingThreshold extends IntegerPreferenceDescriptor {
+    val key = "breakMultipleParametersGroups.breakingThreshold"
+    val description = "Line length after multiple parameters list will break to new line"
+    val preferenceType = IntegerPreference(1, 100)
+    val defaultValue = 80
+  }
+}
 

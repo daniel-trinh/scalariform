@@ -972,14 +972,24 @@ trait ExprFormatter { self: HasFormattingPreferences with AnnotationFormatter wi
   }
 
   def formatParamClauses(paramClauses: ParamClauses, doubleIndentParams: Boolean = false)(implicit formatterState: FormatterState): FormatResult = {
-    val ParamClauses(initialNewlineOpt, paramClausesAndNewlines) = paramClauses
+    val ParamClauses(_, paramClausesAndNewlines) = paramClauses
     var formatResult: FormatResult = NoFormatResult
     var currentFormatterState = formatterState
-    for ((paramClause, newlineOption) ← paramClausesAndNewlines) { // TODO: Newlines. // maybe already done in some cases by format(tmplDef)?
-      val (paramClauseFormatResult, newFormatterState) = formatParamClause(paramClause, doubleIndentParams)(currentFormatterState)
-      formatResult ++= paramClauseFormatResult
-    }
-    formatResult
+    val breakLine = paramClauses.rangeOpt.map(_.length > formattingPreferences(BreakMultipleParameterGroups.BreakingThreshold)).getOrElse(false)
+    type Params = (ParamClause,Option[Token])
+    type Result = (FormatResult, FormatterState, Option[IntertokenFormatInstruction])
+    val start: Result = (FormatResult.EMPTY, formatterState, None)
+    paramClausesAndNewlines.foldLeft(start) { (accumulator: Result, current: Params) =>
+      val (result, formatterState, previousLeftFormat) = accumulator
+      val paramClause = current._1
+      val formatResult = formatParamClause(paramClause, doubleIndentParams)(formatterState)
+      val resultWithNewLines = previousLeftFormat.filter(_ => formattingPreferences(BreakMultipleParameterGroups) && breakLine).map{ p =>
+        FormatResult.EMPTY.before(paramClause.lparen, p)
+      }.foldLeft(formatResult._1 ++ result) { _ ++ _ }
+      val currentLeftFormat = Some(EnsureNewlineAndIndent(0, paramClause.firstTokenOption))
+      formattingPreferences.indentStyle
+      (resultWithNewLines, formatResult._2, currentLeftFormat)
+    }._1
   }
 
   // TODO: Parts of this function might be useful in implementing other alignment features
