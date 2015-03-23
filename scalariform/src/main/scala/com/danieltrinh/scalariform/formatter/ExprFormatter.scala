@@ -971,21 +971,27 @@ trait ExprFormatter { self: HasFormattingPreferences with AnnotationFormatter wi
     formatResult
   }
 
-  def formatParamClauses(paramClauses: ParamClauses, doubleIndentParams: Boolean = false)(implicit formatterState: FormatterState): FormatResult = {
+  def formatParamClauses(paramClauses: ParamClauses, doubleIndentParams: Boolean = false)(implicit envFormatterState: FormatterState): FormatResult = {
     val ParamClauses(_, paramClausesAndNewlines) = paramClauses
     var formatResult: FormatResult = NoFormatResult
-    var currentFormatterState = formatterState
+    var currentFormatterState = envFormatterState
     val breakLine = paramClauses.rangeOpt.map(_.length > formattingPreferences(BreakMultipleParameterGroups.BreakingThreshold)).getOrElse(false)
     type Params = (ParamClause, Option[Token])
     type Result = (FormatResult, FormatterState, Option[IntertokenFormatInstruction])
-    val start: Result = (FormatResult.EMPTY, formatterState, None)
+    val start: Result = (FormatResult.EMPTY, envFormatterState, None)
     paramClausesAndNewlines.foldLeft(start) { (accumulator: Result, current: Params) =>
       val (result, formatterState, previousLeftFormat) = accumulator
       val paramClause = current._1
-      val formatResult = formatParamClause(paramClause, doubleIndentParams)(formatterState)
+      
+      val formatResult = if(paramClause.tokens.exists(hiddenPredecessors(_).containsNewline)){
+        formatParamClause(paramClause, doubleIndentParams)(currentFormatterState)
+      } else {
+        formatParamClause(paramClause, doubleIndentParams)(formatterState)
+      }
       val resultWithNewLines = previousLeftFormat.filter(_ => formattingPreferences(BreakMultipleParameterGroups) && breakLine).map{ p =>
         FormatResult.EMPTY.before(paramClause.lparen, p)
       }.foldLeft(formatResult._1 ++ result) { _ ++ _ }
+      
       if(formattingPreferences(AlignParameters)){
         (resultWithNewLines, formatterState,  previousLeftFormat)
       } else {
@@ -1250,8 +1256,9 @@ trait ExprFormatter { self: HasFormattingPreferences with AnnotationFormatter wi
 
       if (hiddenPredecessors(implicitOrFirstToken).containsNewline) {
         formatResult = formatResult.before(firstToken, formatterState.indent(paramIndent).currentIndentLevelInstruction)
-        if (!alignParameters)
+        if (!alignParameters) {
           paramFormatterState = formatterState.indent(paramIndent)
+        }
       } else if (containsNewline(firstParam) && alignParameters) {
         paramFormatterState = formatterState.alignWithToken(relativeToken)
       }
