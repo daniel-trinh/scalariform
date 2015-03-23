@@ -52,7 +52,7 @@ class MultipleParameterListsFormatterTest extends AbstractFormatterTest {
     |     (y: Int)(z: Int): Int = {
     |}
   """.stripMargin ==>
-      """def f(x: Int)
+    """def f(x: Int)
       |     (y: Int)
       |     (z: Int): Int = {
       |}

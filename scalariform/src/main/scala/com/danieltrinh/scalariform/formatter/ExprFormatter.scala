@@ -976,7 +976,7 @@ trait ExprFormatter { self: HasFormattingPreferences with AnnotationFormatter wi
     var formatResult: FormatResult = NoFormatResult
     var currentFormatterState = formatterState
     val breakLine = paramClauses.rangeOpt.map(_.length > formattingPreferences(BreakMultipleParameterGroups.BreakingThreshold)).getOrElse(false)
-    type Params = (ParamClause,Option[Token])
+    type Params = (ParamClause, Option[Token])
     type Result = (FormatResult, FormatterState, Option[IntertokenFormatInstruction])
     val start: Result = (FormatResult.EMPTY, formatterState, None)
     paramClausesAndNewlines.foldLeft(start) { (accumulator: Result, current: Params) =>
@@ -986,9 +986,12 @@ trait ExprFormatter { self: HasFormattingPreferences with AnnotationFormatter wi
       val resultWithNewLines = previousLeftFormat.filter(_ => formattingPreferences(BreakMultipleParameterGroups) && breakLine).map{ p =>
         FormatResult.EMPTY.before(paramClause.lparen, p)
       }.foldLeft(formatResult._1 ++ result) { _ ++ _ }
-      val currentLeftFormat = Some(EnsureNewlineAndIndent(0, paramClause.firstTokenOption))
-      formattingPreferences.indentStyle
-      (resultWithNewLines, formatResult._2, currentLeftFormat)
+      if(formattingPreferences(AlignParameters)){
+        (resultWithNewLines, formatterState,  previousLeftFormat)
+      } else {
+        (resultWithNewLines, formatResult._2,  Some(EnsureNewlineAndIndent(0, paramClause.firstTokenOption)))
+      }
+
     }._1
   }
 
