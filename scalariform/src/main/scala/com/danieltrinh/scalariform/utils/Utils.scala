@@ -43,15 +43,6 @@ object Utils {
     }
   }
 
-  import scala.reflect.Manifest
-  implicit def any2optionable(x: AnyRef) = new {
-    def matchInstance[B](implicit m: Manifest[B]): Option[B] =
-      if (Manifest.singleType(x) <:< m)
-        Some(x.asInstanceOf[B])
-      else
-        None
-  }
-
   def groupBy[A](eq: (A, A) ⇒ Boolean, lst: List[A]): List[List[A]] =
     lst match {
       case Nil ⇒ Nil
