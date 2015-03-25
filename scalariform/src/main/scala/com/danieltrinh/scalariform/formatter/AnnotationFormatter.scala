@@ -1,9 +1,8 @@
 package com.danieltrinh.scalariform.formatter
 
-import com.danieltrinh.scalariform.parser._
-import com.danieltrinh.scalariform.utils._
-import com.danieltrinh.scalariform.lexer._
 import com.danieltrinh.scalariform.formatter.preferences._
+import com.danieltrinh.scalariform.lexer._
+import com.danieltrinh.scalariform.parser._
 
 trait AnnotationFormatter { self: HasFormattingPreferences with TypeFormatter with ExprFormatter ⇒
 
