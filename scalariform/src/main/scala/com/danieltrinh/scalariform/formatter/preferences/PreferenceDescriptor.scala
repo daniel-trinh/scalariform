@@ -61,7 +61,7 @@ trait IntegerPreferenceDescriptor extends PreferenceDescriptor[Int] {
 
 object AllPreferences {
   val preferences: List[PreferenceDescriptor[_]] = List(
-    RewriteArrowSymbols, IndentSpaces, SpaceBeforeColon, CompactStringConcatenation,
+    RightMargin, RewriteArrowSymbols, IndentSpaces, SpaceBeforeColon, CompactStringConcatenation,
     PreserveSpaceBeforeArguments, AlignParameters, AlignArguments, DoubleIndentClassDeclaration, FormatXml, IndentPackageBlocks,
     AlignSingleLineCaseStatements, AlignSingleLineCaseStatements.MaxArrowIndent, IndentLocalDefs, PreserveDanglingCloseParenthesis,
     SpaceInsideParentheses, SpaceInsideBrackets, SpacesWithinPatternBinders, MultilineScaladocCommentsStartOnFirstLine, IndentWithTabs,
@@ -75,6 +75,19 @@ object AllPreferences {
     map
   }
 
+}
+
+case object RightMargin extends IntegerPreferenceDescriptor {
+  val key = "rightMargin"
+  val description = "The maximum allowed length of a single line, where line breaking is used."
+  val preferenceType = IntegerPreference(1, Integer.MAX_VALUE)
+  /**
+   * See e.g. http://docs.scala-lang.org/style/declarations.html where a
+   * maximum line length of "about 100 characters" is suggested.
+   * Traditionally this value is 80 for many languages, but Scala tends
+   * to have longer lines than many.
+   */
+  val defaultValue = 100
 }
 
 case object RewriteArrowSymbols extends BooleanPreferenceDescriptor {

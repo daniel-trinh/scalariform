@@ -142,6 +142,19 @@ Library
 Preferences
 -----------
 
+rightMargin
+~~~~~~~~~~~
+
+Default: ``100``
+
+The maximum allowed length of a single line, where line breaking is used.
+
+See e.g. http://docs.scala-lang.org/style/declarations.html where a maximum
+line length of "about 100 characters" is suggested.
+
+Traditionally this value is 80 for many languages, but Scala tends to have
+longer lines than many.
+
 alignParameters
 ~~~~~~~~~~~~~~~
 
@@ -567,6 +580,7 @@ make uncompliant source more compliant.
 =========================================== ========= =========
 Preference                                  Value     Default?
 =========================================== ========= =========
+rightMargin                                 ``100``
 alignParameters                             ``false``
 compactStringConcatenation                  ``false``
 doubleIndentClassDeclaration                ``true``    No
