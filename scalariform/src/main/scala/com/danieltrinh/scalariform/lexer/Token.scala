@@ -27,13 +27,4 @@ case class Token(tokenType: TokenType, text: String, offset: Int, rawText: Strin
 
   def isNewline = tokenType.isNewline
 
-  @deprecated(message = "Use text instead" /*, since = "0.1.2"*/ )
-  def getText = text
-
-  @deprecated(message = "Use offset instead" /*, since = "0.1.2"*/ )
-  def startIndex = offset
-
-  @deprecated(message = "Use lastCharacterOffset instead" /*, since = "0.1.2"*/ )
-  def stopIndex = lastCharacterOffset
-
 }

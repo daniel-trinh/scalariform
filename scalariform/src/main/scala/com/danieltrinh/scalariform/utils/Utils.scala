@@ -8,8 +8,6 @@ object Utils {
 
   def when[T](b: Boolean)(x: ⇒ T): Option[T] = if (b) Some(x) else None
 
-  def asInstanceOf[T](o: Any) = if (o.isInstanceOf[T]) Some(o.asInstanceOf[T]) else None
-
   def checkNotNull[T](item: T): T = { require(item != null); item }
 
   implicit def boolean2ImpliesWrapper(b: Boolean): ImpliesWrapper = new ImpliesWrapper(b)
@@ -43,15 +41,6 @@ object Utils {
       val next = (iterable.tail map Some[T]).toList ::: List(None)
       previous zip iterable zip next map { case ((a, b), c) ⇒ (a, b, c) }
     }
-  }
-
-  import scala.reflect.Manifest
-  implicit def any2optionable(x: AnyRef) = new {
-    def matchInstance[B](implicit m: Manifest[B]): Option[B] =
-      if (Manifest.singleType(x) <:< m)
-        Some(x.asInstanceOf[B])
-      else
-        None
   }
 
   def groupBy[A](eq: (A, A) ⇒ Boolean, lst: List[A]): List[List[A]] =
