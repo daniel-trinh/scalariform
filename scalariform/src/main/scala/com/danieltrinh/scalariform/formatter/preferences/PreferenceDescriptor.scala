@@ -65,7 +65,7 @@ object AllPreferences {
     PreserveSpaceBeforeArguments, AlignParameters, AlignArguments, DoubleIndentClassDeclaration, FormatXml, IndentPackageBlocks,
     AlignSingleLineCaseStatements, AlignSingleLineCaseStatements.MaxArrowIndent, IndentLocalDefs, PreserveDanglingCloseParenthesis,
     SpaceInsideParentheses, SpaceInsideBrackets, SpacesWithinPatternBinders, MultilineScaladocCommentsStartOnFirstLine, IndentWithTabs,
-    CompactControlReadability, PlaceScaladocAsterisksBeneathSecondAsterisk, SpacesAroundMultiImports
+    CompactControlReadability, PlaceScaladocAsterisksBeneathSecondAsterisk, SpacesAroundMultiImports, ReflowComments
   )
 
   val preferencesByKey: Map[String, PreferenceDescriptor[_]] = {
@@ -224,4 +224,10 @@ case object SpacesAroundMultiImports extends BooleanPreferenceDescriptor {
   val key = "spacesAroundMultiImports"
   val description = "Place spaces around multi imports (import a.{ b, c, d }"
   val defaultValue = false
+}
+
+case object ReflowComments extends BooleanPreferenceDescriptor {
+  val key = "reflowComments"
+  val description = "Reflow the text in comments if it extends beyond the right hand margin."
+  val defaultValue = true
 }

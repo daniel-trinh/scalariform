@@ -210,4 +210,105 @@ class CommentFormatterTest extends AbstractFormatterTest {
     |  */
     |"""
   }
+
+  {
+    implicit val formattingPreferences = FormattingPreferences
+      .setPreference(RightMargin, 10)
+
+    // This is the example from
+    // http://en.wikipedia.org/wiki/Line_wrap_and_word_wrap#Algorithm
+    """/**
+      | * aaa bb cc ddddd
+      | */""" ==>
+      """/**
+        | * aaa bb
+        | * cc
+        | * ddddd
+        | */
+        |"""
+
+    // A long line is broken on spaces.
+    """/**
+      | * xx xx xx xx xx xx xx xx xx
+      | */""" ==>
+      """/**
+        | * xx xx
+        | * xx xx
+        | * xx xx
+        | * xx xx
+        | * xx
+        | */
+        |"""
+
+    """/**
+      | * x x x x x x x x x x
+      | *
+      | * a a a a a a a a a a
+      | *
+      | * b b b b b b b b b b
+      | */""" ==>
+      """/**
+        | * x x x x
+        | * x x x x
+        | * x x
+        | *
+        | * a a a a
+        | * a a a a
+        | * a a
+        | *
+        | * b b b b
+        | * b b b b
+        | * b b
+        | */
+        |"""
+
+    // When there is no space before the margin, the first space after the
+    // margin is used:
+    """/**
+      | * This supercalifragilistic comment breaks when possible.
+      | */""" ==>
+      """/**
+        | * This
+        | * supercalifragilistic
+        | * comment
+        | * breaks
+        | * when
+        | * possible.
+        | */
+        |"""
+
+    // When there is custom formatting used, it is left alone, so long as
+    // it fits within the margin:
+    """/**
+      | * My list
+      | *   - one
+      | *   - two
+      | * about
+      | * stuff.
+      | */""" ==>
+      """/**
+        | * My list
+        | *   - one
+        | *   - two
+        | * about
+        | * stuff.
+        | */
+        |"""
+
+    // Very long last words in paras still work:
+    """/**
+      | * x x x x xxxxxxxx
+      | *
+      | * a a a a a a aaaaaaaa
+      | */""" ==>
+      """/**
+        | * x x x x
+        | * xxxxxxxx
+        | *
+        | * a a a a
+        | * a a
+        | * aaaaaaaa
+        | */
+        |"""
+  }
 }

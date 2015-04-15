@@ -568,6 +568,26 @@ but the standard Scala formatting requires ``false``.
 See the examples given in "Chapter 13 - Packages and Imports.", page 244 of *Programming in Scala*
 2nd ed. (2010) by Odersky, Spoon and Venners.
 
+reflowComments
+~~~~~~~~~~~~~~
+
+Default: ``true``
+
+Whether to reflow the text in comments if it extends beyond the right hand margin.
+
+If ``true``, then this::
+
+  /**
+   * This comment is really really long and it becomes rather hard to read, especially if you have two source files open side-by-side.
+   */
+
+will be rewritten like::
+
+  /**
+   * This comment is really really long and it becomes rather hard to read, especially if you have
+   * two source files open side-by-side.
+   */
+
 Scala Style Guide
 ~~~~~~~~~~~~~~~~~
 
