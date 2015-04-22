@@ -4,6 +4,10 @@ import java.io.FileOutputStream
 import java.io.FileInputStream
 import java.io.IOException
 
+import scala.annotation.tailrec
+import scala.collection.mutable.ListBuffer
+import scala.reflect.ClassTag
+
 object Utils {
 
   def when[T](b: Boolean)(x: ⇒ T): Option[T] = if (b) Some(x) else None
@@ -62,6 +66,33 @@ object Utils {
         (x :: ys) :: groupBy(eq, zs)
       }
     }
+
+  implicit class ListWithMapAdjacentRunsOf[T](self: List[T]) {
+    /**
+     * Maps the [[self]] list, by passing consecutive runs of elements
+     * of type `TLookFor` through `f`.
+     */
+    def mapAdjacentRunsOf[TLookFor <: T : ClassTag](f: List[TLookFor] => List[TLookFor]): List[T] = {
+      def mapRun: List[TLookFor] => List[TLookFor] = {
+        case Nil => Nil
+        case run => f(run)
+      }
+
+      @tailrec
+      def walk(list: List[T], outputAcc: ListBuffer[T], runAcc: ListBuffer[TLookFor]): List[T] = {
+        list match {
+          case Nil =>
+            (outputAcc ++ mapRun(runAcc.toList)).toList
+          case (partOfRun: TLookFor) :: rest =>
+            walk(rest, outputAcc, runAcc :+ partOfRun)
+          case notPartOfRun :: rest =>
+            walk(rest, (outputAcc ++ mapRun(runAcc.toList)) :+ notPartOfRun, ListBuffer.empty)
+        }
+      }
+
+      walk(self, ListBuffer.empty, ListBuffer.empty)
+    }
+  }
 
   // Swing ---------------------
 

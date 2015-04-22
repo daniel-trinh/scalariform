@@ -5,17 +5,17 @@ import scalariform.formatter._
 import scalariform.formatter.preferences._
 
 // format: OFF
-class CommentFormatterTest extends AbstractFormatterTest {
+class ScalaDocCommentFormatterTest extends AbstractFormatterTest {
 
   type Result = CompilationUnit
 
   def parse(parser: ScalaParser) = parser.scriptBody()
-  
+
   def format(formatter: ScalaFormatter, result: Result) = formatter.format(result)(FormatterState())
 
   override val debug = false
 
-  """/** 
+  """/**
     |*a
     |b
     | */c""" ==>
@@ -25,7 +25,7 @@ class CommentFormatterTest extends AbstractFormatterTest {
     | */
     |c"""
 
-  """/** 
+  """/**
     |*a
     |b
     | */""" ==>
@@ -37,7 +37,7 @@ class CommentFormatterTest extends AbstractFormatterTest {
 
   """/**
     | *
-    | *Wibble*/ 
+    | *Wibble*/
     |class X""" ==>
   """/**
     | *
@@ -88,7 +88,7 @@ class CommentFormatterTest extends AbstractFormatterTest {
     | * b
     | */
     |"""
-      
+
   // nested comments
   """/**
     |/*
@@ -99,17 +99,17 @@ class CommentFormatterTest extends AbstractFormatterTest {
     | * */
     | */
     |"""
-      
+
   {
   implicit val formattingPreferences = FormattingPreferences.setPreference(MultilineScaladocCommentsStartOnFirstLine, true)
 
-  """/** This method applies f to each 
+  """/** This method applies f to each
     | *  element of the given list.
     | */""" ==>
   """/** This method applies f to each
     | *  element of the given list.
     | */
-    |""" 
+    |"""
 
   """/** Foo
     |Bar
@@ -132,18 +132,18 @@ class CommentFormatterTest extends AbstractFormatterTest {
     | */
     |"""
   }
-  
+
   {
   implicit val formattingPreferences = FormattingPreferences.setPreference(PlaceScaladocAsterisksBeneathSecondAsterisk, true)
 
-  """/** This method applies f to each 
+  """/** This method applies f to each
     | * element of the given list.
     | */""" ==>
   """/**
     |  * This method applies f to each
     |  * element of the given list.
     |  */
-    |""" 
+    |"""
 
   """/** Foo
     |Bar
@@ -168,18 +168,18 @@ class CommentFormatterTest extends AbstractFormatterTest {
     |  */
     |"""
   }
-  
+
   {
   implicit val formattingPreferences = FormattingPreferences
     .setPreference(MultilineScaladocCommentsStartOnFirstLine, true)
     .setPreference(PlaceScaladocAsterisksBeneathSecondAsterisk, true)
-  """/** This method applies f to each 
+  """/** This method applies f to each
     | * element of the given list.
     | */""" ==>
   """/** This method applies f to each
     |  * element of the given list.
     |  */
-    |""" 
+    |"""
 
   """/** Foo
     |Bar
@@ -248,17 +248,20 @@ class CommentFormatterTest extends AbstractFormatterTest {
       | * b b b b b b b b b b
       | */""" ==>
       """/**
-        | * x x x x
-        | * x x x x
-        | * x x
+        | * x x x
+        | * x x x
+        | * x x x
+        | * x
         | *
-        | * a a a a
-        | * a a a a
-        | * a a
+        | * a a a
+        | * a a a
+        | * a a a
+        | * a
         | *
-        | * b b b b
-        | * b b b b
-        | * b b
+        | * b b b
+        | * b b b
+        | * b b b
+        | * b
         | */
         |"""
 
@@ -280,16 +283,16 @@ class CommentFormatterTest extends AbstractFormatterTest {
     // When there is custom formatting used, it is left alone, so long as
     // it fits within the margin:
     """/**
-      | * My list
-      | *   - one
-      | *   - two
+      | * A list
+      | *  - one
+      | *  - two
       | * about
       | * stuff.
       | */""" ==>
       """/**
-        | * My list
-        | *   - one
-        | *   - two
+        | * A list
+        | *  - one
+        | *  - two
         | * about
         | * stuff.
         | */
@@ -302,11 +305,12 @@ class CommentFormatterTest extends AbstractFormatterTest {
       | * a a a a a a aaaaaaaa
       | */""" ==>
       """/**
-        | * x x x x
+        | * x x x
+        | * x
         | * xxxxxxxx
         | *
-        | * a a a a
-        | * a a
+        | * a a a
+        | * a a a
         | * aaaaaaaa
         | */
         |"""
