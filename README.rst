@@ -1,6 +1,6 @@
 NOTICE: We've moved!
 ===========
-Scalariform is now officially maintained by scala-ide. All further developments will be happening in their branch.
+`Scalariform`_ is now officially maintained by scala-ide. All further developments will be happening in their branch.
 
 .. _Scalariform: https://github.com/scala-ide/scalariform
 
