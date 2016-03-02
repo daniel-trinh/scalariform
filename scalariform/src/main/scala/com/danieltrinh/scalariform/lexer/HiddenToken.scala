@@ -20,8 +20,17 @@ object Comment {
 
 }
 
+/**
+ * A comment starting with "//" that extends to the end of the line.
+ */
 case class SingleLineComment(override val token: Token) extends Comment(token)
 
+/**
+ * A comment starting with "/*" that extends until a matching "*/"
+ */
 case class MultiLineComment(override val token: Token) extends Comment(token)
 
+/**
+ * A comment starting "/**" that extends until a matching "*/"
+ */
 case class ScalaDocComment(override val token: Token) extends Comment(token)

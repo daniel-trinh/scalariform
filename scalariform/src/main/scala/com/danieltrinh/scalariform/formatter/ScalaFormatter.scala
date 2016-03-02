@@ -1,14 +1,13 @@
 package scalariform.formatter
 
+import scala.PartialFunction._
+import scalariform.ScalaVersions
+import scalariform.formatter.preferences._
 import scalariform.lexer.Tokens._
 import scalariform.lexer._
 import scalariform.parser._
 import scalariform.utils.Utils._
 import scalariform.utils._
-import scalariform.utils.BooleanLang._
-import scalariform.formatter.preferences._
-import PartialFunction._
-import scalariform.ScalaVersions
 
 trait HasHiddenTokenInfo {
 
@@ -195,12 +194,25 @@ abstract class ScalaFormatter extends HasFormattingPreferences with TypeFormatte
           builder.indent(indentLevel, baseIndentOption)
         } else {
           val commentIndentLevel = if (nextTokenUnindents) indentLevel + 1 else indentLevel
-          for ((previousOpt, hiddenToken, nextOpt) ← Utils.withPreviousAndNext(hiddenTokens)) {
+
+          // Any groups / paragraphs of SingleLineComments in the 'hiddenTokens' list will
+          // appear as a run of (SingleLineComment, Whitespace("   ")) pairs if the '//'
+          // comment block is indented, or as a run of (SingleLineComment) elements if the
+          // block is not indented.
+          //
+          // To allow this to be reflown, we can just strip out any Whitespace("   ") tokens
+          // as they will be ignored below anyway, then gather together any runs of
+          // SingleLineComments and pass them to the CommentFormatter.
+          val hiddenTokens2 = hiddenTokens.tokens
+            .filterNot(cond(_) { case Whitespace(token) => !token.text.contains('\n') })
+            .mapAdjacentRunsOf[SingleLineComment](formatComment(commentIndentLevel))
+
+          for ((previousOpt, hiddenToken, nextOpt) ← Utils.withPreviousAndNext(hiddenTokens2)) {
             hiddenToken match {
-              case ScalaDocComment(token) ⇒
+              case scalaDoc: ScalaDocComment ⇒
                 builder.ensureAtBeginningOfLine()
                 builder.indent(commentIndentLevel, baseIndentOption)
-                builder.append(formatComment(hiddenToken, commentIndentLevel))
+                builder.append(formatComment(scalaDoc, commentIndentLevel))
               case SingleLineComment(_) | MultiLineComment(_) ⇒
                 if (builder.atBeginningOfLine)
                   builder.indent(commentIndentLevel, baseIndentOption)
@@ -234,7 +246,6 @@ abstract class ScalaFormatter extends HasFormattingPreferences with TypeFormatte
                   }
               }
             }
-
           }
         }
     }
@@ -446,19 +457,19 @@ object ScalaFormatter {
     OBJECT, OVERRIDE, PACKAGE, PRIVATE, PROTECTED,
     RETURN, SEALED, /* SUPER, THIS, */
     THROW, TRAIT, TRY, /* TYPE ,*/
-    VAL, VAR, WHILE, WITH, YIELD, 
+    VAL, VAR, WHILE, WITH, YIELD,
     /* USCORE, */ COLON, EQUALS, ARROW, LARROW, RARROW, SUBTYPE, VIEWBOUND, SUPERTYPE, /* HASH, AT */
     LBRACE, SEMI)
 
   val ENSURE_SPACE_BEFORE = Set(
-    ABSTRACT, CASE, CATCH, CLASS, DEF, 
-    /* DO, */  ELSE, EXTENDS, FINAL,
-    FINALLY, /* FOR, */ FORSOME, /* IF, */ IMPLICIT, 
+    ABSTRACT, CASE, CATCH, CLASS, DEF,
+    /* DO, */ ELSE, EXTENDS, FINAL,
+    FINALLY, /* FOR, */ FORSOME, /* IF, */ IMPLICIT,
     /* IMPORT, */ LAZY, MATCH, /* NEW, */
     OBJECT, OVERRIDE, /* PACKAGE, */ PRIVATE, PROTECTED,
     /* RETURN, */ SEALED, /* SUPER, THIS, */
     /* THROW, */ TRAIT, /* TRY, TYPE, */
-    VAL, VAR, /* WHILE, */ WITH, YIELD, 
+    VAL, VAR, /* WHILE, */ WITH, YIELD,
     /* USCORE, COLON, */ EQUALS, /* ARROW, */ LARROW, RARROW, SUBTYPE, VIEWBOUND, SUPERTYPE, /*, HASH, AT, */
     RBRACE)
   // format: ON
@@ -485,5 +496,4 @@ object ScalaFormatter {
     val (edits, _) = specificFormatter.fullFormat(source, scalaVersion = scalaVersion)(formattingPreferences)
     edits
   }
-
 }

@@ -360,6 +360,10 @@ case class TemplateBody(newlineOpt: Option[Token], lbrace: Token, statSeq: StatS
   lazy val tokens = flatten(newlineOpt, lbrace, statSeq, rbrace)
 }
 
+/**
+ * A scala statement AST Node.
+ * Files are a list of Stat nodes
+ */
 sealed trait Stat extends AstNode
 
 case class StatSeq(

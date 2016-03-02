@@ -90,17 +90,30 @@ trait IntegerPreferenceDescriptor extends PreferenceDescriptor[Int] {
 
 object AllPreferences {
   val preferences: List[PreferenceDescriptor[_]] = List(
-    RewriteArrowSymbols, IndentSpaces, SpaceBeforeColon, CompactStringConcatenation,
+    RightMargin, RewriteArrowSymbols, IndentSpaces, SpaceBeforeColon, CompactStringConcatenation,
     PreserveSpaceBeforeArguments, AlignParameters, AlignArguments, DoubleIndentClassDeclaration, FormatXml, IndentPackageBlocks,
     AlignSingleLineCaseStatements, AlignSingleLineCaseStatements.MaxArrowIndent, IndentLocalDefs, PreserveDanglingCloseParenthesis, DanglingCloseParenthesis,
     SpaceInsideParentheses, SpaceInsideBrackets, SpacesWithinPatternBinders, MultilineScaladocCommentsStartOnFirstLine, IndentWithTabs,
-    CompactControlReadability, PlaceScaladocAsterisksBeneathSecondAsterisk, SpacesAroundMultiImports
+    CompactControlReadability, PlaceScaladocAsterisksBeneathSecondAsterisk, SpacesAroundMultiImports, ReflowComments
   )
 
   val preferencesByKey: Map[String, PreferenceDescriptor[_]] =
     preferences.foldLeft(Map.empty[String, PreferenceDescriptor[_]]) {
       case (m, preference) ⇒ m + (preference.key → preference)
     }
+}
+
+case object RightMargin extends IntegerPreferenceDescriptor {
+  val key = "rightMargin"
+  val description = "The maximum allowed length of a single line, where line breaking is used."
+  val preferenceType = IntegerPreference(1, Integer.MAX_VALUE)
+  /**
+   * See e.g. http://docs.scala-lang.org/style/declarations.html where a
+   * maximum line length of "about 100 characters" is suggested.
+   * Traditionally this value is 80 for many languages, but Scala tends
+   * to have longer lines than many.
+   */
+  val defaultValue = 100
 }
 
 case object RewriteArrowSymbols extends BooleanPreferenceDescriptor {
@@ -243,4 +256,10 @@ case object SpacesAroundMultiImports extends BooleanPreferenceDescriptor {
   val key = "spacesAroundMultiImports"
   val description = "Place spaces around multi imports (import a.{ b, c, d }"
   val defaultValue = false
+}
+
+case object ReflowComments extends BooleanPreferenceDescriptor {
+  val key = "reflowComments"
+  val description = "Reflow the text in comments if it extends beyond the right hand margin."
+  val defaultValue = true
 }

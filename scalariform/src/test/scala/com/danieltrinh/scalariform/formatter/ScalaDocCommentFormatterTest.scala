@@ -5,17 +5,17 @@ import scalariform.formatter._
 import scalariform.formatter.preferences._
 
 // format: OFF
-class CommentFormatterTest extends AbstractFormatterTest {
+class ScalaDocCommentFormatterTest extends AbstractFormatterTest {
 
   type Result = CompilationUnit
 
   def parse(parser: ScalaParser) = parser.scriptBody()
-  
+
   def format(formatter: ScalaFormatter, result: Result) = formatter.format(result)(FormatterState())
 
   override val debug = false
 
-  """/** 
+  """/**
     |*a
     |b
     | */c""" ==>
@@ -25,7 +25,7 @@ class CommentFormatterTest extends AbstractFormatterTest {
     | */
     |c"""
 
-  """/** 
+  """/**
     |*a
     |b
     | */""" ==>
@@ -37,7 +37,7 @@ class CommentFormatterTest extends AbstractFormatterTest {
 
   """/**
     | *
-    | *Wibble*/ 
+    | *Wibble*/
     |class X""" ==>
   """/**
     | *
@@ -88,7 +88,7 @@ class CommentFormatterTest extends AbstractFormatterTest {
     | * b
     | */
     |"""
-      
+
   // nested comments
   """/**
     |/*
@@ -99,17 +99,17 @@ class CommentFormatterTest extends AbstractFormatterTest {
     | * */
     | */
     |"""
-      
+
   {
   implicit val formattingPreferences = FormattingPreferences.setPreference(MultilineScaladocCommentsStartOnFirstLine, true)
 
-  """/** This method applies f to each 
+  """/** This method applies f to each
     | *  element of the given list.
     | */""" ==>
   """/** This method applies f to each
     | *  element of the given list.
     | */
-    |""" 
+    |"""
 
   """/** Foo
     |Bar
@@ -132,18 +132,18 @@ class CommentFormatterTest extends AbstractFormatterTest {
     | */
     |"""
   }
-  
+
   {
   implicit val formattingPreferences = FormattingPreferences.setPreference(PlaceScaladocAsterisksBeneathSecondAsterisk, true)
 
-  """/** This method applies f to each 
+  """/** This method applies f to each
     | * element of the given list.
     | */""" ==>
   """/**
     |  * This method applies f to each
     |  * element of the given list.
     |  */
-    |""" 
+    |"""
 
   """/** Foo
     |Bar
@@ -168,18 +168,18 @@ class CommentFormatterTest extends AbstractFormatterTest {
     |  */
     |"""
   }
-  
+
   {
   implicit val formattingPreferences = FormattingPreferences
     .setPreference(MultilineScaladocCommentsStartOnFirstLine, true)
     .setPreference(PlaceScaladocAsterisksBeneathSecondAsterisk, true)
-  """/** This method applies f to each 
+  """/** This method applies f to each
     | * element of the given list.
     | */""" ==>
   """/** This method applies f to each
     |  * element of the given list.
     |  */
-    |""" 
+    |"""
 
   """/** Foo
     |Bar
@@ -209,5 +209,110 @@ class CommentFormatterTest extends AbstractFormatterTest {
     |  * element of the given list.
     |  */
     |"""
+  }
+
+  {
+    implicit val formattingPreferences = FormattingPreferences
+      .setPreference(RightMargin, 10)
+
+    // This is the example from
+    // http://en.wikipedia.org/wiki/Line_wrap_and_word_wrap#Algorithm
+    """/**
+      | * aaa bb cc ddddd
+      | */""" ==>
+      """/**
+        | * aaa bb
+        | * cc
+        | * ddddd
+        | */
+        |"""
+
+    // A long line is broken on spaces.
+    """/**
+      | * xx xx xx xx xx xx xx xx xx
+      | */""" ==>
+      """/**
+        | * xx xx
+        | * xx xx
+        | * xx xx
+        | * xx xx
+        | * xx
+        | */
+        |"""
+
+    """/**
+      | * x x x x x x x x x x
+      | *
+      | * a a a a a a a a a a
+      | *
+      | * b b b b b b b b b b
+      | */""" ==>
+      """/**
+        | * x x x
+        | * x x x
+        | * x x x
+        | * x
+        | *
+        | * a a a
+        | * a a a
+        | * a a a
+        | * a
+        | *
+        | * b b b
+        | * b b b
+        | * b b b
+        | * b
+        | */
+        |"""
+
+    // When there is no space before the margin, the first space after the
+    // margin is used:
+    """/**
+      | * This supercalifragilistic comment breaks when possible.
+      | */""" ==>
+      """/**
+        | * This
+        | * supercalifragilistic
+        | * comment
+        | * breaks
+        | * when
+        | * possible.
+        | */
+        |"""
+
+    // When there is custom formatting used, it is left alone, so long as
+    // it fits within the margin:
+    """/**
+      | * A list
+      | *  - one
+      | *  - two
+      | * about
+      | * stuff.
+      | */""" ==>
+      """/**
+        | * A list
+        | *  - one
+        | *  - two
+        | * about
+        | * stuff.
+        | */
+        |"""
+
+    // Very long last words in paras still work:
+    """/**
+      | * x x x x xxxxxxxx
+      | *
+      | * a a a a a a aaaaaaaa
+      | */""" ==>
+      """/**
+        | * x x x
+        | * x
+        | * xxxxxxxx
+        | *
+        | * a a a
+        | * a a a
+        | * aaaaaaaa
+        | */
+        |"""
   }
 }
