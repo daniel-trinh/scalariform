@@ -9,31 +9,34 @@ import sbtassembly.AssemblyPlugin.autoImport._
 
 object ScalariformBuild extends Build {
 
-   // This is to make sure nobody tries to compile with 1.6 as the target JDK.
-   // Not clear if this will actually work on 1.8, needs to be tested when that is out.
-   val validateJavaVersion = taskKey[Unit]("Check if we are running using required Java version")
-   val mismatchedSpecificationMessage =
-   """|Java 1.7 is required for building the `misc` subproject of Scalariform.
-      |
-      |This is due to a dependency on the javax.swing library, which
-      |had an API change from 1.6 to 1.7.
-      |
-      |Using 1.7 to build requires setting SBT to use JDK 1.7 or higher -- if SBT is
-      |booting on JDK 1.6, you will get a javax.swing related compilation error.""".stripMargin
-
-  lazy val commonSettings = Defaults.defaultSettings ++ SbtScalariform.defaultScalariformSettings ++ sonatypeSettings ++ Seq(
+  lazy val commonSettings = inConfig(Test)(Defaults.testSettings) ++ SbtScalariform.defaultScalariformSettings ++ sonatypeSettings ++ Seq(
     organization := "org.scalariform",
     profileName := "org.scalariform",
-    version := "0.1.8",
-    scalaVersion := "2.10.6",
+    version := "0.2.0-SNAPSHOT",
+    scalaVersion := "2.11.7",
     crossScalaVersions := Seq(
       "2.11.7",
       "2.10.6",
       "2.9.3", "2.9.2" //"2.9.1-1", "2.9.1", "2.9.0-1", "2.9.0"
     ),
     exportJars := true, // Needed for cli oneJar
-    retrieveManaged := true,
-    scalacOptions += "-deprecation"
+    scalacOptions ++= (scalaBinaryVersion.value match {
+      case "2.11" => Seq(
+        "-deprecation:false",
+        "-encoding", "UTF-8",
+        "-feature",
+        "-language:_",
+        "-unchecked",
+        "-Xlint",
+        "-Xfuture",
+        "-Xfatal-warnings",
+        "-Yno-adapted-args",
+        "-Ywarn-dead-code",
+        "-Ywarn-unused-import",
+        "-Ywarn-unused"
+      )
+      case _ => Seq()
+    })
   )
 
   lazy val subprojectSettings = commonSettings ++ Seq(
@@ -42,11 +45,7 @@ object ScalariformBuild extends Build {
   def getScalariformPreferences(dir: File) =
     PreferencesImporterExporter.loadPreferences((dir / ".." / "formatterPreferences.properties").getPath)
 
-  lazy val root: Project = Project("root", file("."), settings = commonSettings ++ Seq(
-    publish := (),
-    publishLocal := ())
-  ) aggregate (scalariform, cli, misc)
-
+  lazy val root: Project = Project("root", file("."), settings = commonSettings) aggregate (scalariform, cli)
 
   implicit class Regex(sc: StringContext) {
     def r = new util.matching.Regex(sc.parts.mkString, sc.parts.tail.map(_ => "x"): _*)
@@ -84,6 +83,11 @@ object ScalariformBuild extends Build {
         libraryDependencies <<= (scalaVersion, libraryDependencies) { (sv, deps) ⇒
           deps ++ get2_11Dependencies(sv) :+ getScalaTestDependency(sv)
         },
+        // sbt doesn't automatically load the content of the MANIFST.MF file, therefore we have to do it here by ourselves
+        packageOptions in Compile in packageBin += {
+          val m = Using.fileInputStream(new java.io.File("scalariform/META-INF/MANIFEST.MF"))(in => new java.util.jar.Manifest(in))
+          Package.JarManifest(m)
+        },
         testOptions in Test += Tests.Argument("-oI"),
         publishTo <<= isSnapshot(getPublishToRepo)))
 
@@ -106,25 +110,6 @@ object ScalariformBuild extends Build {
       }
     ) ++ addArtifact(artifact in (Compile, assembly), assembly)
   ) dependsOn (scalariform)
-
-  lazy val misc: Project = Project("misc", file("misc"), settings = subprojectSettings ++
-    Seq(
-      libraryDependencies ++= Seq(
-        "commons-io" % "commons-io" % "1.4",
-        "com.miglayout" % "miglayout" % "3.7.4"),
-      publish := (),
-      publishLocal := (),
-      validateJavaVersion := {
-        val specJavaVersion = sys.props("java.specification.version")
-        val compatibleJavaVersion = specJavaVersion == "1.7" || specJavaVersion == "1.8"
-        if (!compatibleJavaVersion)
-          sys.error(mismatchedSpecificationMessage)
-      },
-      // this means we'll validate required Java version only _right before_ running the compile
-      // command in misc subproject. In particular, build won't fail if user is not interested
-      // in building `misc` subproject.
-      compile in Compile := ((compile in Compile) dependsOn validateJavaVersion).value,
-      mainClass in (Compile, run) := Some("scalariform.gui.Main"))) dependsOn (scalariform, cli)
 
   def pomExtraXml =
     <inceptionYear>2010</inceptionYear>
