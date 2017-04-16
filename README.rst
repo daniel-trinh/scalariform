@@ -21,7 +21,7 @@ the way you'd like it, and I'll see what I can do.
 Scalariform is licenced under `The MIT Licence`_.
 
 .. _Scala Style Guide: http://docs.scala-lang.org/style/
-.. _The MIT Licence: http://www.opensource.org/licenses/mit-license.php
+.. _The MIT Licence: http://opensource.org/licenses/mit-license.php
 
 Installing with Homebrew (for OS X users)
 -----------------------------------------
@@ -63,7 +63,7 @@ Usage within a project
 
 Have a use for the scalariform source code directly? You can use it as a build dependency: ::
 
-    "org.scalariform" %% "scalariform" % "0.1.8"
+    "org.scalariform" %% "scalariform" % "0.2.0"
 
 Integration with Eclipse
 ------------------------
@@ -87,16 +87,14 @@ Integration with Emacs/ENSIME
 
 "`ENSIME`_ uses the Scalariform library to format Scala sources. Type C-c C-v f to format the current buffer."
 
-  http://aemon.com/file_dump/ensime_manual.html#tth_sEc4.8
-
-.. _ENSIME: http://github.com/aemoncannon/ensime
+.. _ENSIME: https://github.com/ensime/ensime-server
 
 Integration with jEdit
 ----------------------
 
 See `ScalaSidekick`_ by Stefan Ettrup:
 
-.. _ScalaSidekick: http://github.com/StefanE/ScalaSidekick
+.. _ScalaSidekick: https://github.com/StefanE/ScalaSidekick
 
 Run Plugins -> scalaSidekickPlugin -> Format Scala File
 
@@ -154,12 +152,12 @@ You can create your own executable scalariform.jar by following the instructions
 Command line tool
 -----------------
 
-  https://github.com/mdr/scalariform/wiki/Command-line-tool
+  https://github.com/scala-ide/scalariform/wiki/Command-line-tool
 
 Library
 -------
 
-  https://github.com/mdr/scalariform/wiki/Library
+  https://github.com/scala-ide/scalariform/wiki/Library
 
 Preferences
 -----------
@@ -171,7 +169,9 @@ Default: ``false``
 
 Align class/function parameters (modifiers and name, type, and defaults) in three columns.
 
-For example, if ``false``, then::
+For example, if ``false``, then:
+
+.. code:: scala
 
   class Person(name: String,
     age: Int = 24,
@@ -181,7 +181,9 @@ For example, if ``false``, then::
     favoriteColor: java.awt.Color
   )
 
-If ``true``, then::
+If ``true``, then:
+
+.. code:: scala
 
   class Person(
     name:             String,
@@ -195,14 +197,18 @@ If ``true``, then::
 This will also place the "implicit" keyword in parameters on its own line, whenever
 the parameter being formatted contains a newline::
 
-For example, if ``false``, then::
+For example, if ``false``, then:
+
+.. code:: scala
 
   def formatBirthDate(
     implicit birthdate: Date = Date("11/11/11"),
     birthtime: Time
   ): DateTime
 
-If ``true``, then::
+If ``true``, then:
+
+.. code:: scala
 
   def formatBirthDate(
     implicit
@@ -220,7 +226,9 @@ Default: ``false``
 
 Aligns multi-line arguments
 
-For example, if ``false``, then::
+For example, if ``false``, then:
+
+.. code:: scala
 
   Cake(candles = 10,
     frostingFlavor = Vanilla,
@@ -228,7 +236,9 @@ For example, if ``false``, then::
     iceCream = true
   )
 
-If ``true``, then::
+If ``true``, then:
+
+.. code:: scala
 
   Cake(
     candles        = 10,
@@ -245,7 +255,9 @@ alignSingleLineCaseStatements
 
 Default: ``false``
 
-Align the arrows of consecutive single-line case statements. For example, if ``true``, then::
+Align the arrows of consecutive single-line case statements. For example, if ``true``, then:
+
+.. code:: scala
 
   a match {
     case b => 1
@@ -253,7 +265,9 @@ Align the arrows of consecutive single-line case statements. For example, if ``t
     case dd => 3
   }
 
-Is reformatted as::
+Is reformatted as:
+
+.. code:: scala
 
   a match {
     case b   => 1
@@ -271,7 +285,9 @@ Default: ``40``
 When ``alignSingleLineCaseStatements`` is ``true``, this is a limit on
 the number of spaces that can be inserted before an arrow to align it
 with other case statements. This can be used to avoid very large gaps,
-e.g.::
+e.g.:
+
+.. code:: scala
 
   a match {
     case Some(wibble, wobble) if wibble + wibble > wobble * wibble => 1
@@ -287,9 +303,9 @@ When ``compactControlReadability`` is ``true``, then ``if``/``else`` and
 ``try``/``catch``/``finally`` control structures will be formatted
 using `Compact Control Readability`_ style
 
-.. _Compact Control Readability: http://en.wikipedia.org/wiki/Indent_style#Variant:_Stroustrup
+.. _Compact Control Readability: https://en.wikipedia.org/wiki/Indent_style#Variant:_Stroustrup
 
-::
+.. code:: scala
 
   if (x == y) {
     foo()
@@ -317,11 +333,15 @@ compactStringConcatenation
 
 Default: ``false``
 
-Omit spaces when formatting a '+' operator on String literals. For example, if ``false``, then::
+Omit spaces when formatting a '+' operator on String literals. For example, if ``false``, then:
+
+.. code:: scala
 
   "Hello " + name + "!"
 
-If ``true``, then::
+If ``true``, then:
+
+.. code:: scala
 
   "Hello "+name+"!"
 
@@ -340,7 +360,9 @@ will be formatted as recommended_ by the Scala Style Guide. That is,
 if the declaration section spans multiple lines, it will be formatted
 so that either the parameter section or the inheritance section is
 doubly indented. This provides a visual distinction from the members
-of the class. For example::
+of the class. For example:
+
+.. code:: scala
 
   class Person(
     name: String,
@@ -356,7 +378,9 @@ of the class. For example::
     def firstMethod = ...
   }
 
-Or::
+Or:
+
+.. code:: scala
 
   class Person(
       name: String,
@@ -370,6 +394,29 @@ Or::
 
 .. _recommended: http://docs.scala-lang.org/style/declarations.html#classes
 
+doubleIndentMethodDeclaration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Default: ``false``
+
+With this set to ``true``, method declarations will have an extra indentation
+added to their parameter list, if it spans multiple lines.
+This provides a visual distinction from the method body. For example::
+
+  def longMethodNameIsLong(paramOneNameIsLong: String, paramTwo: String,
+      paramThreeNameIsReallyLong): Unit = {
+    val startOfMethod = ...
+  }
+
+Or::
+
+  def longMethodNameIsLong(
+      paramOneNameIsLong: String,
+      paramTwoNameIsLong: String,
+      paramThreeNameIsLong): Unit = {
+    val startOfMethod = ...
+  }
+
 formatXml
 ~~~~~~~~~
 
@@ -382,7 +429,9 @@ indentLocalDefs
 
 Default: ``false``
 
-If ``true``, indent local methods an extra level, with the intention of distinguishing them from other statements. For example,::
+If ``true``, indent local methods an extra level, with the intention of distinguishing them from other statements. For example,:
+
+.. code:: scala
 
   class A {
     def find(...) = {
@@ -400,7 +449,9 @@ indentPackageBlocks
 
 Default: ``true``
 
-Whether to indent package blocks. For example, if ``true``::
+Whether to indent package blocks. For example, if ``true``:
+
+.. code:: scala
 
   package foo {
     package bar {
@@ -408,7 +459,9 @@ Whether to indent package blocks. For example, if ``true``::
     }
   }
 
-Else if ``false``::
+Else if ``false``:
+
+.. code:: scala
 
   package foo {
   package bar {
@@ -441,13 +494,17 @@ multilineScaladocCommentsStartOnFirstLine
 
 Default: ``false``
 
-If ``true``, start a multi-line Scaladoc comment body on same line as the opening comment delimiter::
+If ``true``, start a multi-line Scaladoc comment body on same line as the opening comment delimiter:
+
+.. code:: scala
 
   /** This method applies f to each
    *  element of the given list.
    */
 
-If ``false``, start the comment body on a separate line below the opening delimiter::
+If ``false``, start the comment body on a separate line below the opening delimiter:
+
+.. code:: scala
 
   /**
    * This method applies f to each
@@ -459,14 +516,18 @@ placeScaladocAsterisksBeneathSecondAsterisk
 
 Default: ``false``
 
-If ``true``, Scaladoc asterisks will be placed beneath the second asterisk::
+If ``true``, Scaladoc asterisks will be placed beneath the second asterisk:
+
+.. code:: scala
 
   /** Wibble
     * wobble
     */
   class A
 
-Otherwise, if ``false``, beneath the first asterisk::
+Otherwise, if ``false``, beneath the first asterisk:
+
+.. code:: scala
 
   /** Wibble
    *  wobble
@@ -478,7 +539,9 @@ preserveSpaceBeforeArguments
 
 Default: ``false``
 
-If ``true``, the formatter will keep an existing space before a parenthesis argument. For example::
+If ``true``, the formatter will keep an existing space before a parenthesis argument. For example:
+
+.. code:: scala
 
   stack.pop() should equal (2)
 
@@ -489,24 +552,32 @@ danglingCloseParenthesis
 
 Default: ``Force``
 
-If ``Force``, any closing parentheses will be set to dangle. For example::
+If ``Force``, any closing parentheses will be set to dangle. For example:
+
+.. code:: scala
 
    Box(
      contents: List[Thing])
 
-becomes::
+becomes:
+
+.. code:: scala
 
    Box(
      contents: List[Thing]
    )
 
-If ``Prevent``, all dangling parenthesis are collapsed. For example::
+If ``Prevent``, all dangling parenthesis are collapsed. For example:
+
+.. code:: scala
 
    Box(
      contents: List[Thing]
    )
 
-becomes::
+becomes:
+
+.. code:: scala
 
    Box(
      contents: List[Thing])
@@ -519,14 +590,18 @@ rewriteArrowSymbols
 
 Default: ``false``
 
-Replace arrow tokens with their unicode equivalents: ``=>`` with ``⇒``, and ``<-`` with ``←``. For example::
+Replace arrow tokens with their unicode equivalents: ``=>`` with ``⇒``, and ``<-`` with ``←``. For example:
+
+.. code:: scala
 
   for (n <- 1 to 10) n % 2 match {
     case 0 => println("even")
     case 1 => println("odd")
   }
 
-is formatted as::
+is formatted as:
+
+.. code:: scala
 
   for (n ← 1 to 10) n % 2 match {
     case 0 ⇒ println("even")
@@ -538,11 +613,15 @@ spaceBeforeColon
 
 Default: ``false``
 
-Whether to ensure a space before colon. For example, if ``false``, then::
+Whether to ensure a space before colon. For example, if ``false``, then:
+
+.. code:: scala
 
   def add(a: Int, b: Int): Int = a + b
 
-If ``true``, then::
+If ``true``, then:
+
+.. code:: scala
 
   def add(a : Int, b : Int) : Int = a + b
 
@@ -551,11 +630,15 @@ spaceInsideBrackets
 
 Default: ``false``
 
-Whether to use a space inside type brackets. For example, if ``true``, then::
+Whether to use a space inside type brackets. For example, if ``true``, then:
+
+.. code:: scala
 
   Array[ String ]
 
-If ``false``, then::
+If ``false``, then:
+
+.. code:: scala
 
   Array[String]
 
@@ -564,11 +647,15 @@ spaceInsideParentheses
 
 Default: ``false``
 
-Whether to use a space inside non-empty parentheses. For example, if ``true``, then::
+Whether to use a space inside non-empty parentheses. For example, if ``true``, then:
+
+.. code:: scala
 
   def main( args : Array[String] )
 
-If ``false``, then::
+If ``false``, then:
+
+.. code:: scala
 
   def main(args : Array[String])
 
@@ -577,11 +664,15 @@ spacesWithinPatternBinders
 
 Default: ``true``
 
-Whether to add a space around the @ token in pattern binders. For example, if ``true``,::
+Whether to add a space around the @ token in pattern binders. For example, if ``true``,:
+
+.. code:: scala
 
   case elem @ Multi(values @ _*) =>
 
-If ``false``,::
+If ``false``,:
+
+.. code:: scala
 
   case elem@Multi(values@_*) =>
 
@@ -591,12 +682,16 @@ spacesAroundMultiImports
 Default: ``false``
 
 Whether or not to add spaces around multi-imports.
-For example, if ``false``, then::
+For example, if ``false``, then:
+
+.. code:: scala
 
   import a.{b,c,d}
   import foo.{bar => baz}
 
-If ``true``, then::
+If ``true``, then:
+
+.. code:: scala
 
   import a.{ b, c, d }
   import foo.{ bar => baz }
@@ -640,7 +735,9 @@ As well as global preferences, formatting can be tweaked at the source level thr
 format: [ON|OFF]
 ~~~~~~~~~~~~~~~~
 
-Disables the formatter for selective portions of a source file::
+Disables the formatter for selective portions of a source file:
+
+.. code:: scala
 
   // format: OFF    <-- this directive disables formatting from this point
   class AsciiDSL {
@@ -671,10 +768,13 @@ Disables the formatter for selective portions of a source file::
 format: [+|-]<preferenceName>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Sets a preference for the entirety of the source file, overriding the global formatting settings::
+Sets a preference for the entirety of the source file, overriding the global formatting settings:
+
+.. code:: scala
 
   // format: +preserveSpaceBeforeArguments
   class StackSpec extends FlatSpec with ShouldMatchers {
     // ...
     stack.pop() should equal (2)
   }
+
