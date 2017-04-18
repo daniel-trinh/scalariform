@@ -181,6 +181,17 @@ class CommentFormatterTest extends AbstractFormatterTest {
     |  */
     |""" 
 
+  """/**
+    | * Scaladoc should be retained.
+    | * @param first line retains indent.
+    | *     second line retains indent.
+    | */""" ==>
+  """/** Scaladoc should be retained.
+    |  * @param first line retains indent.
+    |  *     second line retains indent.
+    |  */
+    |"""
+
   """/** Foo
     |Bar
     |*Baz  */""" ==>
